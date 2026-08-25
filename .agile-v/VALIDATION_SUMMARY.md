@@ -15,6 +15,16 @@
 | VAL-0011 | lint | `npm run lint` | **PASS** | 2026-08-26 | post SEO/branding + opengraph-image |
 | VAL-0012 | build | `npm run build` | **PASS** | 2026-08-26 | `/opengraph-image` route; package `website-url-rag-chatbot` |
 | VAL-0013 | security | `/review-security` | **PASS WITH WARNINGS** | 2026-08-26 | DNS TOCTOU + CSP unsafe-inline accepted for demo scope |
+| VAL-0014 | lint | `npm run lint` | **PASS** | 2026-08-26 | ingest UX dedup + fetch-page-content tests + GitHub CI |
+| VAL-0015 | unit tests | `npm run test` | **PASS** | 2026-08-26 | 29 passed, 1 skipped (live Jina smoke); +9 fetch-page-content mocked |
+| VAL-0016 | build | `npm run build` | **PASS** | 2026-08-26 | Next 16.3.3 Turbopack; Node 24 |
+| VAL-0017 | live ingest | `npm run test:live-ingest` | **SKIPPED** | 2026-08-26 | gated on `RUN_LIVE_INGEST_SMOKE`; CI job runs when `JINA_API_KEY` secret set |
+| VAL-0018 | lint | `npm run lint` | **PASS** | 2026-08-26 | chat UI redesign |
+| VAL-0019 | unit tests | `npm run test` | **PASS** | 2026-08-26 | 35 passed (+ chat-sessions-storage, buildSessionId chatId) |
+| VAL-0020 | build | `npm run build` | **PASS** | 2026-08-26 | `/api/chat-history`; full-width chat shell |
+| VAL-0021 | lint | `npm run lint` | **PASS** | 2026-08-26 | chat UI polish + chip dedupe |
+| VAL-0022 | unit tests | `npm run test` | **PASS** | 2026-08-26 | 38 passed, 1 skipped |
+| VAL-0023 | build | `npm run build` | **PASS** | 2026-08-26 | commit-ready final |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

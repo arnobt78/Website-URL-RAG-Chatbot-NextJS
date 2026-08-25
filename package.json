@@ -10,7 +10,8 @@
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:live-ingest": "RUN_LIVE_INGEST_SMOKE=1 vitest run src/lib/fetch-page-content.live.test.ts"
   },
   "dependencies": {
     "@nextui-org/react": "^2.6.11",

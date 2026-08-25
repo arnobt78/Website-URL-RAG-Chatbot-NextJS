@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, Sparkles, Zap, Database, MessageSquare, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, Globe, Sparkles, Zap, Database, MessageSquare, Shield, Loader2, Info } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { HeroBackground } from "./HeroBackground";
 import { ChatNavigationOverlay } from "./ChatNavigationOverlay";
 import { useChatNavigation } from "@/hooks/use-chat-navigation";
 import { urlToChatPath } from "@/lib/url-to-chat-path";
+import { INGEST_HERO_NOTE } from "@/lib/ingest-user-messages";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import {
   revealVariants,
@@ -56,7 +57,7 @@ const FEATURES = [
 
 const STEPS = [
   { step: "01", title: "Enter a URL", desc: "Paste any public website address on the landing page." },
-  { step: "02", title: "Auto-Ingest", desc: "HTML is chunked and embedded into Upstash Vector automatically." },
+  { step: "02", title: "Auto-Ingest", desc: "Jina Reader extracts readable text, then chunks embed into Upstash Vector." },
   { step: "03", title: "Ask Anything", desc: "Stream answers grounded in the indexed page content." },
 ] as const;
 
@@ -175,6 +176,10 @@ export function HomePage() {
                   Will open: {pathPreview}
                 </p>
               )}
+              <p className="flex items-start gap-2 text-left text-xs leading-relaxed text-zinc-500">
+                <Info className="size-3.5 shrink-0 mt-0.5 text-zinc-500" aria-hidden="true" />
+                <span>{INGEST_HERO_NOTE}</span>
+              </p>
             </motion.form>
 
             {error && (

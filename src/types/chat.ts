@@ -8,3 +8,13 @@ export type ChatMessage = {
   content: string;
   createdAt?: string;
 };
+
+/** SSR + client context for the active chat page. */
+export type ChatPageContext = {
+  httpsUrl: string;
+  canonicalKey: string;
+  indexed: boolean;
+  ingestError?: string;
+  ingestedCharCount?: number;
+  chatId?: string;
+};

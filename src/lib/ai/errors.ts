@@ -18,7 +18,20 @@ function extractStatus(error: unknown): number | undefined {
 function extractMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    if (typeof record.message === "string") return record.message;
+  }
   return "Unknown error";
+}
+
+function isTransientNetworkMessage(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("timeout") ||
+    lower.includes("econnreset") ||
+    lower.includes("network")
+  );
 }
 
 function classifyByStatus(status: number | undefined, message: string): ClassifiedError {
@@ -64,6 +77,16 @@ function classifyByStatus(status: number | undefined, message: string): Classifi
     };
   }
 
+  if (isTransientNetworkMessage(message)) {
+    return {
+      kind: "upstream",
+      status: status ?? 503,
+      message,
+      retriable: true,
+      skipProvider: false,
+    };
+  }
+
   if (status !== undefined && status >= 400 && status < 500 && !RETRIABLE_STATUSES.has(status)) {
     return {
       kind: "client",
@@ -74,15 +97,10 @@ function classifyByStatus(status: number | undefined, message: string): Classifi
     };
   }
 
-  if (
-    status !== undefined && RETRIABLE_STATUSES.has(status) ||
-    lower.includes("timeout") ||
-    lower.includes("econnreset") ||
-    lower.includes("network")
-  ) {
+  if (status !== undefined && RETRIABLE_STATUSES.has(status)) {
     return {
       kind: "upstream",
-      status: status ?? 503,
+      status,
       message,
       retriable: true,
       skipProvider: status === 429,

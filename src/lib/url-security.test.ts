@@ -44,6 +44,14 @@ describe("session binding helpers", () => {
     expect(sessionMatchesCookie("other--uuid-a", "www.example.com", "uuid-a")).toBe(false);
   });
 
+  it("includes chatId in session id when provided", () => {
+    const chatId = "11111111-1111-4111-8111-111111111111";
+    const sessionId = buildSessionId("www.example.com", "uuid-a", chatId);
+    expect(sessionId).toMatch(/^[a-f0-9]{16}--uuid-a--11111111-1111-4111-8111-111111111111$/);
+    expect(sessionMatchesCookie(sessionId, "www.example.com", "uuid-a", chatId)).toBe(true);
+    expect(sessionMatchesCookie(sessionId, "www.example.com", "uuid-a")).toBe(false);
+  });
+
   it("does not collide when slashes differ in canonical keys", () => {
     const cookie = "uuid-a";
     const a = buildSessionId("example.com/a/b", cookie);

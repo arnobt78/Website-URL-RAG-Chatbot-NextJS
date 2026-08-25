@@ -9,7 +9,7 @@ export const Providers = ({ children }: PropsWithChildren) => {
   return (
     <NextUIProvider>
       {children}
-      <Toaster richColors closeButton position="top-right" />
+      <Toaster richColors closeButton position="bottom-right" />
     </NextUIProvider>
   );
 };

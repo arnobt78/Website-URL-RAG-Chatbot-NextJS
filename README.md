@@ -64,11 +64,14 @@ The original Upstash-hosted Llama models (`upstash()` + QStash) were **discontin
 | Catch-all dynamic routing                       | `src/app/[...url]/page.tsx`                           |
 | RAG (Retrieval-Augmented Generation)            | `src/lib/rag-chat.ts`, `@upstash/rag-chat`            |
 | Vector databases & semantic search              | Upstash Vector + `ragChat.context.add()`              |
+| SPA / JS-heavy page ingestion                   | `src/lib/fetch-page-content.ts` (Jina Reader)       |
 | Multi-provider LLM fallback                     | `src/lib/ai/`                                         |
 | Streaming HTTP responses                        | `src/app/api/chat-stream/route.ts`, `ChatWrapper.tsx` |
+| Session sidebar (localStorage CRUD)             | `src/components/chat/ChatSidebar.tsx`                 |
 | Rate limiting with Redis                        | `src/lib/rate-limit.ts`                               |
 | Session cookies & proxy (Next.js 16)            | `src/proxy.ts`                                        |
 | Modern UI (Tailwind, NextUI, Sonner toasts)     | `src/components/`                                     |
+| GitHub Actions CI                               | `.github/workflows/ci.yml`                            |
 
 ---
 
@@ -97,20 +100,24 @@ A **Large Language Model** generates human-like text. This project supports seve
 
 ## Features
 
-- **URL-based ingestion** — chat with any site via `/www.example.com`
+- **SPA-aware ingestion** — Jina Reader extracts readable text from JavaScript-heavy sites before embedding
 - **Upstash Vector RAG** — built-in embeddings (`bge-large-en-v1.5`), no separate embedding API key
 - **Multi-provider LLM fallback** — Gemini → Groq → OpenRouter (`:free`) → Hugging Face → OpenAI (optional)
 - **Live token streaming** — character-by-character assistant replies
-- **Chat history** — stored in Redis, scoped by URL + anonymous session
+- **Modern chat shell** — full-width layout, left/right bubbles (~85%), taller composer, dynamic URL/index empty state
+- **Session sidebar** — localStorage chat list (all sites / this site), new / rename / delete; multi-chat via `?chat=` UUID
+- **Prompt chips** — suggested questions above the composer when the thread is empty
+- **Chat history** — Redis-backed messages scoped by URL + cookie (+ optional `chatId`); delete via `DELETE /api/chat-history`
 - **Rate limiting** — Redis per-IP soft limit on `/api/chat-stream` and ingest throttling on first visit
-- **SSRF protection** — DNS-validated URLs; private/reserved IPs blocked on server
+- **SSRF protection** — DNS-validated URLs; private/reserved IPs blocked on server; redirect re-validation on HTML fallback
 - **Session binding** — HttpOnly cookie + URL-scoped namespace (no client-supplied session ID)
 - **Landing navigation UX** — live path preview, phase-based overlay + Sonner toasts
 - **Sonner toasts** — user-friendly errors (429, 502, auth, etc.)
 - **Thinking animation** — pulse + animated dots while waiting for first token
 - **Message metadata** — timestamp + one-click copy
 - **Animated landing page** — hero rotation, URL form → chat route
-- **SEO & security headers** — metadata, `robots.ts`, production guardrails
+- **CI** — GitHub Actions lint/test/build; optional live Jina smoke when `JINA_API_KEY` secret is set
+- **SEO & security headers** — metadata, `robots.ts`, production guardrails (CSP includes `'unsafe-eval'` for Next/Turbopack)
 - **TypeScript end-to-end** — strict types, Zod validation on API
 
 ---
@@ -123,6 +130,7 @@ sequenceDiagram
   participant Landing as HomePage
   participant Page as url_page_SSR
   participant Proxy as proxy_ts
+  participant Jina as Jina_Reader
   participant Vector as Upstash_Vector
   participant Redis as Upstash_Redis
   participant API as chat_stream
@@ -131,9 +139,11 @@ sequenceDiagram
   User->>Landing: Enter URL on /
   Landing->>Page: Navigate /www.example.com
   Proxy->>Page: x-session-id cookie
-  Page->>Redis: sismember indexed-urls
+  Page->>Redis: sismember indexed-urls jina-v1 key
   alt Not indexed
-    Page->>Vector: ragChat.context.add html
+    Page->>Jina: fetchPageContentAsText
+    Jina-->>Page: markdown text
+    Page->>Vector: ragChat.context.add text
     Page->>Redis: sadd indexed-urls
   end
   Page->>Redis: history.getMessages
@@ -184,45 +194,55 @@ ai-rag-chatbot/
 ├── public/
 │   ├── hero/              # Landing hero background images
 │   └── logo.svg
+├── .github/workflows/
+│   └── ci.yml                          # lint + test + build; optional Jina smoke
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx                    # Landing page (/)
 │   │   ├── layout.tsx                  # Root layout, SEO metadata
 │   │   ├── globals.css
 │   │   ├── robots.ts                   # Crawl rules + AI bot denies
-│   │   ├── api/chat-stream/route.ts    # POST — streaming chat API
+│   │   ├── api/
+│   │   │   ├── chat-stream/route.ts    # POST — streaming chat API
+│   │   │   └── chat-history/route.ts   # DELETE — clear Redis history for a chat
 │   │   └── [...url]/
-│   │       ├── page.tsx                # Ingest + chat SSR
+│   │       ├── page.tsx                # Ingest + chat SSR (?chat= optional)
 │   │       └── layout.tsx              # Full-height chat shell
 │   ├── components/
-│   │   ├── landing/                    # HomePage, HeroBackground
-│   │   ├── ui/                         # safe-image, sonner
-│   │   ├── ChatWrapper.tsx             # Client chat shell + streaming
-│   │   ├── ChatInput.tsx               # Input + send button
+│   │   ├── landing/                    # HomePage, HeroBackground, nav overlay
+│   │   ├── chat/                       # ChatShell, Sidebar, Header, EmptyState, PromptChips
+│   │   ├── ui/                         # confirm-dialog, safe-image
+│   │   ├── ChatWrapper.tsx             # Client orchestrator + streaming
+│   │   ├── ChatInput.tsx               # Composer (taller textarea)
 │   │   ├── Messages.tsx                # Scrollable list + auto-scroll
-│   │   ├── Message.tsx                 # Bubble, copy, timestamp
+│   │   ├── Message.tsx                 # Left/right bubbles (~85%)
 │   │   ├── ThinkingIndicator.tsx       # Loading animation
 │   │   └── Providers.tsx               # NextUI + Toaster
 │   ├── lib/
-│   │   ├── site.ts                     # SEO + branding constants (layout, landing)
+│   │   ├── site.ts                     # SEO + branding constants
+│   │   ├── fetch-page-content.ts       # Jina Reader + HTML fallback
+│   │   ├── ingest-constants.ts         # INDEX_CONTENT_VERSION / Redis keys
+│   │   ├── chat-sessions-storage.ts    # Browser session list (localStorage)
+│   │   ├── chat-layout.ts              # Shared chat gutters
+│   │   ├── chat-prompt-chips.ts        # Suggested prompt strings
 │   │   ├── ai/                         # Multi-provider fallback
-│   │   │   ├── providers.ts            # Registry + model chains
-│   │   │   ├── fallback-rag-chat.ts    # Orchestrator
-│   │   │   ├── errors.ts               # Error classification
+│   │   │   ├── providers.ts
+│   │   │   ├── fallback-rag-chat.ts
+│   │   │   ├── errors.ts
 │   │   │   └── types.ts
 │   │   ├── rag-chat.ts                 # Lazy RAGChat singleton
-│   │   ├── redis.ts                    # Upstash Redis client
-│   │   ├── rate-limit.ts               # Per-IP chat rate limit
-│   │   ├── chat-errors.ts              # HTTP → toast mapping
-│   │   ├── url-to-chat-path.ts         # URL → /path helper
-│   │   └── motion.ts                   # Framer Motion variants
-│   ├── types/chat.ts                   # ChatMessage type
+│   │   ├── redis.ts
+│   │   ├── rate-limit.ts
+│   │   ├── chat-errors.ts
+│   │   ├── url-to-chat-path.ts
+│   │   └── motion.ts
+│   ├── types/chat.ts                   # ChatMessage + ChatPageContext
 │   └── proxy.ts                        # Session cookie + x-session-id
-├── docs/                               # Extended specs (LLM selection, UI, guardrails)
-├── .env.example                        # Environment template (never commit .env)
-├── SECURITY.md                         # Private vulnerability reporting
-├── vercel.json                         # Security headers mirror
-├── next.config.mjs                     # Headers, serverExternalPackages
+├── docs/
+├── .env.example
+├── SECURITY.md
+├── vercel.json
+├── next.config.mjs
 └── package.json
 ```
 
@@ -235,25 +255,29 @@ ai-rag-chatbot/
 | Route         | Type        | Description                                             |
 | ------------- | ----------- | ------------------------------------------------------- |
 | `/`           | Static/SSR  | Animated landing — enter a URL to start chatting        |
-| `/[...url]`   | Dynamic SSR | e.g. `/www.wikipedia.org` — ingests site, loads chat UI |
+| `/[...url]`   | Dynamic SSR | e.g. `/www.wikipedia.org` — ingests site, loads chat UI; optional `?chat=<uuid>` |
 | `/robots.txt` | Static      | SEO crawl rules                                         |
 
 ### API
 
-| Method | Path               | Description                                 |
-| ------ | ------------------ | ------------------------------------------- |
-| `POST` | `/api/chat-stream` | Stream assistant reply (RAG + LLM fallback) |
+| Method   | Path                 | Description                                          |
+| -------- | -------------------- | ---------------------------------------------------- |
+| `POST`   | `/api/chat-stream`   | Stream assistant reply (RAG + LLM fallback)          |
+| `DELETE` | `/api/chat-history`  | Clear Redis messages for URL + cookie (+ optional `chatId`) |
 
-**Request body:**
+**Request body (`POST /api/chat-stream`):**
 
 ```json
 {
   "canonicalUrl": "https://www.wikipedia.org",
+  "chatId": "11111111-1111-4111-8111-111111111111",
   "messages": [{ "role": "user", "content": "What is Wikipedia?" }]
 }
 ```
 
-The anonymous **`sessionId` HttpOnly cookie** (set by `src/proxy.ts`) is required — the API derives the Redis session key from `canonicalUrl` + cookie. Do not send `sessionId` in the JSON body.
+`chatId` is optional (UUID). When set, Redis history uses `{urlHash}--{cookie}--{chatId}`; when omitted, the legacy `{urlHash}--{cookie}` key is used.
+
+The anonymous **`sessionId` HttpOnly cookie** (set by `src/proxy.ts`) is required — the API derives the Redis session key from `canonicalUrl` + cookie (+ optional `chatId`). Do not send `sessionId` in the JSON body.
 
 **Success:** `200` with `Content-Type: text/plain` streaming body  
 **Response headers:** `X-LLM-Provider`, `X-LLM-Model` (which provider answered)  
@@ -353,12 +377,14 @@ npm run dev
 
 ## Running the Project
 
-| Command         | Purpose                                                            |
-| --------------- | ------------------------------------------------------------------ |
-| `npm run dev`   | Start dev server at [http://localhost:3000](http://localhost:3000) |
-| `npm run build` | Production build                                                   |
-| `npm run start` | Run production build locally                                       |
-| `npm run lint`  | ESLint check                                                       |
+| Command                  | Purpose                                                            |
+| ------------------------ | ------------------------------------------------------------------ |
+| `npm run dev`            | Start dev server at [http://localhost:3000](http://localhost:3000) |
+| `npm run build`          | Production build                                                   |
+| `npm run start`          | Run production build locally                                       |
+| `npm run lint`           | ESLint check                                                       |
+| `npm run test`           | Vitest unit tests                                                  |
+| `npm run test:live-ingest` | Optional live Jina smoke (`RUN_LIVE_INGEST_SMOKE=1`)             |
 
 ### Try it
 
@@ -372,35 +398,49 @@ npm run dev
 
 ## Component Walkthrough
 
-### `ChatWrapper.tsx` (client)
+### `ChatWrapper.tsx` + `chat/ChatShell.tsx` (client)
 
-Central chat controller:
+Central chat controller and full-viewport shell:
 
-- Manages message state
-- `POST`s to `/api/chat-stream`
+- Manages message state, sidebar epoch, and `?chat=` sync
+- `POST`s to `/api/chat-stream` with optional `chatId`
 - Reads `ReadableStream` for token-by-token updates
 - Shows Sonner toasts on HTTP errors
-- Removes failed assistant placeholder on error
+- Renders `ChatSidebar`, `ChatHeader`, messages, prompt chips (empty thread only), and composer
 
 ```tsx
-// Minimal reuse pattern (session comes from proxy cookie on the server page)
 <ChatWrapper
-  canonicalKey="www.example.com"
+  pageContext={{
+    httpsUrl: "https://www.example.com",
+    canonicalKey: "www.example.com",
+    indexed: true,
+    chatId: undefined,
+  }}
   initialMessages={[]}
-  ingestError={null}
 />
 ```
 
+### `chat/ChatSidebar.tsx`
+
+- Lists chats from **browser localStorage** (not a server DB) — All chats / This site
+- New chat, rename, delete (delete also calls `DELETE /api/chat-history`)
+- Pre-redesign Redis threads appear as **Previous chat** (legacy sentinel; no `chatId` on the wire)
+
 ### `Messages.tsx` + `Message.tsx`
 
-- Auto-scrolls to latest message during streaming
+- Auto-scrolls during streaming; dynamic empty state (URL + index status)
+- User bubbles right / assistant left (`max-w-[85%]`)
 - **ThinkingIndicator** when assistant message is empty but loading
-- Footer: formatted timestamp + copy-to-clipboard with check feedback
+- Timestamp + copy-to-clipboard
 
 ### `ChatInput.tsx`
 
-- Enter to send, Shift+Enter for newline
-- Disabled while loading; does not clear input if submit blocked
+- Taller textarea (`minRows={3}`); Enter to send, Shift+Enter for newline
+- Shared horizontal gutters with header/messages (`px-3 sm:px-4 lg:px-6`)
+
+### `chat/PromptChips.tsx`
+
+Suggested prompts above the composer when there are no messages yet.
 
 ### `HomePage.tsx` + `HeroBackground.tsx`
 
@@ -414,17 +454,17 @@ Single source of truth for **SEO metadata** (`layout.tsx`) and landing copy — 
 
 ## Backend & AI Layer
 
-### Ingestion (`src/lib/load-chat-page-data.ts` + `src/app/[...url]/page.tsx`)
+### Ingestion (`src/lib/fetch-page-content.ts` + `src/lib/load-chat-page-data.ts`)
 
 ```typescript
-// Pseudocode flow — with multi-provider fallback on ingest/history failures
-const { messages, ingestError } = await loadChatPageData({
-  canonicalKey,
-  sessionId,
-  clientIp,
-});
-// loadChatPageData: sismember → context.add (with fallback) → sadd only on success
+// Pseudocode flow — Jina Reader for SPAs, text ingest with versioned namespace
+const pageContent = await fetchPageContentAsText(httpsUrl); // Jina → HTML fallback
+await client.context.add({ type: "text", data: pageContent.text, options: { namespace } });
+await redis.sadd("indexed-urls", `jina-v1:${canonicalKey}`);
+// namespace = sha256("jina-v1:" + canonicalKey) — isolates ingest generations
 ```
+
+Optional **`JINA_API_KEY`** improves rate limits for production ([jina.ai/reader](https://jina.ai/reader)). First ingest may take 10–20 seconds on JavaScript-heavy sites.
 
 ### Multi-provider fallback (`src/lib/ai/`)
 

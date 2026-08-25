@@ -10,6 +10,7 @@ import { z } from "zod";
 
 const chatBodySchema = z.object({
   canonicalUrl: z.string().min(1).max(2048),
+  chatId: z.string().uuid().optional(),
   messages: z
     .array(
       z
@@ -76,14 +77,14 @@ export const POST = async (req: NextRequest) => {
     return jsonError(400, "Invalid request", "Message format or length is invalid.");
   }
 
-  const { messages, canonicalUrl } = parsed.data;
+  const { messages, canonicalUrl, chatId } = parsed.data;
 
   const urlResult = await parseUserUrlInput(canonicalUrl);
   if (!urlResult.ok) {
     return jsonError(403, "URL not allowed", urlResult.reason);
   }
 
-  const sessionId = buildSessionId(urlResult.canonicalKey, cookieSessionId);
+  const sessionId = buildSessionId(urlResult.canonicalKey, cookieSessionId, chatId);
   const namespace = urlToNamespace(urlResult.canonicalKey);
   const lastMessage = messages[messages.length - 1].content;
 

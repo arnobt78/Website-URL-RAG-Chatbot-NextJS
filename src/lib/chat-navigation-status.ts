@@ -29,7 +29,7 @@ export const CHAT_NAV_INDEX_STEPS: ChatNavStep[] = [
   },
   {
     title: "Indexing content…",
-    subtitle: "Chunking and embedding for RAG",
+    subtitle: "Reading page via Jina Reader",
   },
 ];
 

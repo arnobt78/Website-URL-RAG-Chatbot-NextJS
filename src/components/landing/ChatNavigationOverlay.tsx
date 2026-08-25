@@ -1,5 +1,6 @@
 "use client";
 
+import { INGEST_INDEX_TIP } from "@/lib/ingest-user-messages";
 import { formatPhaseStep, CHAT_NAV_VALIDATE_STEPS, type ChatNavStep } from "@/lib/chat-navigation-status";
 
 type ChatNavigationOverlayProps = {
@@ -26,6 +27,7 @@ export function ChatNavigationOverlay({ visible, step }: ChatNavigationOverlayPr
         />
         <p className="mt-6 text-lg font-semibold">{step?.title ?? defaultStep.title}</p>
         <p className="mt-2 text-sm text-zinc-400">{step?.subtitle ?? defaultStep.subtitle}</p>
+        <p className="mt-4 max-w-sm text-xs leading-relaxed text-zinc-500">{INGEST_INDEX_TIP}</p>
       </div>
     </div>
   );

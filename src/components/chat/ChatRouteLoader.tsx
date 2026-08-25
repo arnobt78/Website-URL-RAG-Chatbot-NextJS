@@ -1,5 +1,6 @@
 "use client";
 
+import { INGEST_INDEX_TIP } from "@/lib/ingest-user-messages";
 import {
   clearChatNavActive,
   isChatNavActive,
@@ -45,6 +46,9 @@ export function ChatRouteLoader() {
       />
       <p className="mt-6 text-lg font-semibold">{step?.title ?? fallback.title}</p>
       <p className="mt-2 text-sm text-zinc-400">{step?.subtitle ?? fallback.subtitle}</p>
+      <p className="mt-4 max-w-sm px-4 text-center text-xs leading-relaxed text-zinc-500">
+        {INGEST_INDEX_TIP}
+      </p>
     </div>
   );
 }

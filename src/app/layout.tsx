@@ -67,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     // data-scroll-behavior: App Router Day-1 guardrail (smooth scroll without JS delay).
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={cn(inter.className, "min-h-screen antialiased")}>
         <Providers>
           {/* min-h-screen allows landing to scroll; chat route uses its own h-screen layout */}

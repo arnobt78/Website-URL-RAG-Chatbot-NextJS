@@ -1,4 +1,8 @@
+import "server-only";
+
 import { runWithRagChatFallback } from "@/lib/ai/fallback-rag-chat";
+import { fetchPageContentAsText } from "@/lib/fetch-page-content";
+import { indexRedisKey } from "@/lib/ingest-constants";
 import { allowIngestRequest } from "@/lib/rate-limit";
 import { redis } from "@/lib/redis";
 import type { ChatMessage } from "@/types/chat";
@@ -16,6 +20,7 @@ export type LoadChatPageDataResult = {
   initialMessages: ChatMessage[];
   indexed: boolean;
   ingestError?: string;
+  ingestedCharCount?: number;
 };
 
 /**
@@ -59,11 +64,19 @@ export async function loadChatPageData({
     };
   }
 
+  const pageContent = await fetchPageContentAsText(httpsUrl);
+  if (!pageContent.ok) {
+    return {
+      initialMessages,
+      indexed: false,
+      ingestError: pageContent.reason,
+    };
+  }
+
   const ingestResult = await runWithRagChatFallback((client) =>
     client.context.add({
-      type: "html",
-      source: httpsUrl,
-      config: { chunkOverlap: 50, chunkSize: 200 },
+      type: "text",
+      data: pageContent.text,
       options: { namespace },
     })
   );
@@ -76,7 +89,16 @@ export async function loadChatPageData({
     };
   }
 
-  await redis.sadd("indexed-urls", canonicalKey);
+  const saveResult = ingestResult.result as { success?: boolean; ids?: string[] };
+  if (saveResult.success === false || !saveResult.ids?.length) {
+    return {
+      initialMessages,
+      indexed: false,
+      ingestError: "Indexing produced no searchable content. Try a different page.",
+    };
+  }
 
-  return { initialMessages, indexed: true };
+  await redis.sadd("indexed-urls", indexRedisKey(canonicalKey));
+
+  return { initialMessages, indexed: true, ingestedCharCount: pageContent.text.length };
 }

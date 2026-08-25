@@ -4,33 +4,34 @@
 |-------|-------|
 | Cycle | **C1** |
 | Phase / Stage | Implementation complete — commit-ready |
-| Gate | GATE-0001 approved; **Human-Action remaining:** Vercel Firewall + production LLM env vars |
-| Status | Full-stack overhaul committed locally pending push |
-| Git HEAD (pre-work baseline) | `24c776f` |
-| Last updated | 2026-08-26T00:40:00Z |
+| Gate | GATE-0001 approved; **Human-Action remaining:** Vercel Firewall + production LLM/Jina env |
+| Status | Jina ingest + modern chat UI + CI verified; ready to commit |
+| Git HEAD (pre-work baseline) | `94ccdc6` |
+| Last updated | 2026-08-26T00:00:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- Multi-provider LLM fallback (`src/lib/ai/`) — Gemini → Groq → OpenRouter → Hugging Face → optional OpenAI
-- `loadChatPageData` with fallback on ingest/history; `runWithRagChatFallback`
-- Security: DNS SSRF guards, session binding (cookie + `canonicalUrl`), ingest/chat rate limits, CSP headers
-- Landing page + phase-based chat navigation (overlay, Sonner toasts, path preview)
-- SEO/branding: `src/lib/site.ts`, `opengraph-image.tsx`, README, package name `website-url-rag-chatbot`
-- Next.js 16 `proxy.ts` (middleware removed); vitest (16 tests); eslint flat config
-- Validation: lint PASS, test PASS (16), build PASS, security review PASS WITH WARNINGS
+- Jina Reader ingest (`fetch-page-content.ts`) + `INDEX_CONTENT_VERSION` / namespace isolation
+- Ingest UX copy (hero, loaders); `errors.ts` precedence fix
+- Chat UI redesign: `ChatShell`, sidebar (localStorage CRUD), left/right bubbles, full-width gutters, prompt chips (composer only)
+- Multi-chat: `?chat=` UUID, `buildSessionId(..., chatId?)`, `DELETE /api/chat-history`, legacy **Previous chat** sentinel
+- GitHub Actions CI (lint/test/build + optional live Jina smoke)
+- CSP `'unsafe-eval'` for Turbopack; `suppressHydrationWarning` on `<html>`
+- Validation: lint PASS, test PASS (38 + 1 skipped), build PASS
 
 ## Human-Action remaining
 
 1. Vercel Firewall: Bot Protection = Challenge, AI Bots = Deny
-2. Confirm Node **24.x** + all LLM/Upstash env vars on production
-3. Optional: custom domain vs `scraper-rag-chatbot.vercel.app`
+2. Confirm Node **24.x** + LLM/Upstash/`JINA_API_KEY` on production
+3. Optional: add `JINA_API_KEY` GitHub Actions secret for live ingest smoke
+4. Deploy + smoke `/www.arnobmahmud.com` (or Wikipedia) after push
 
 ## Next exact action
 
-Push commit when ready; smoke test `/www.wikipedia.org` on production.
+Commit locally; push when ready; production smoke.
 
 ## Resume command
 

@@ -24,7 +24,7 @@ function formatMessageTime(iso?: string): string {
   }
 }
 
-/** Single chat bubble — user vs assistant styling with avatar, timestamp, and copy. */
+/** Single chat bubble — user right-aligned, assistant left-aligned (~85% width). */
 export const Message = ({
   content,
   isUserMessage,
@@ -47,59 +47,72 @@ export const Message = ({
 
   return (
     <div
-      className={cn({
-        "bg-zinc-800": isUserMessage,
-        "bg-zinc-900/25": !isUserMessage,
-      })}
+      className={cn(
+        "flex w-full py-2",
+        isUserMessage ? "justify-end" : "justify-start"
+      )}
     >
-      <div className="p-6 pb-4">
-        <div className="max-w-3xl mx-auto flex items-start gap-2.5">
+      <div
+        className={cn(
+          "flex max-w-[85%] gap-2",
+          isUserMessage ? "flex-row-reverse" : "flex-row"
+        )}
+      >
+        <div
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-full border",
+            isUserMessage
+              ? "border-sky-700 bg-sky-950 text-sky-200"
+              : "border-zinc-600 bg-zinc-800 text-zinc-200"
+          )}
+        >
+          {isUserMessage ? <User className="size-4" /> : <Bot className="size-4" />}
+        </div>
+
+        <div className={cn("min-w-0", isUserMessage ? "items-end" : "items-start")}>
           <div
             className={cn(
-              "size-10 shrink-0 aspect-square rounded-full border border-zinc-700 bg-zinc-900 flex justify-center items-center",
-              {
-                "bg-blue-950 border-blue-700 text-zinc-200": isUserMessage,
-              }
+              "rounded-2xl px-4 py-3",
+              isUserMessage
+                ? "bg-gradient-to-br from-sky-600 to-blue-700 text-white"
+                : "border border-zinc-700 bg-zinc-800/90 text-zinc-100"
             )}
           >
-            {isUserMessage ? <User className="size-5" /> : <Bot className="size-5 text-white" />}
-          </div>
-
-          <div className="flex flex-col ml-6 w-full min-w-0">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                {isUserMessage ? "You" : "Website"}
-              </span>
-            </div>
-
             {isThinking ? (
               <ThinkingIndicator />
             ) : (
-              <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white text-justify whitespace-pre-wrap break-words">
-                {content}
-              </p>
+              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{content}</p>
             )}
           </div>
+
+          {!isThinking && (displayTime || content) ? (
+            <div
+              className={cn(
+                "mt-1 flex items-center gap-2 px-1",
+                isUserMessage ? "justify-end" : "justify-start"
+              )}
+            >
+              {displayTime ? (
+                <span className="text-xs text-zinc-500">{displayTime}</span>
+              ) : null}
+              {content ? (
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="inline-flex size-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                  aria-label={copied ? "Copied" : "Copy message"}
+                >
+                  {copied ? (
+                    <Check className="size-3 text-emerald-400" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
-
-      {(displayTime || content) && !isThinking && (
-        <div className="max-w-3xl mx-auto px-6 pb-4 flex items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">{displayTime}</span>
-          {content ? (
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors"
-              aria-label={copied ? "Copied" : "Copy message"}
-            >
-              {copied ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
-            </button>
-          ) : (
-            <span className="size-8" />
-          )}
-        </div>
-      )}
     </div>
   );
 };

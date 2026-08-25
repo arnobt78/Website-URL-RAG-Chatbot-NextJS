@@ -1,24 +1,26 @@
 "use client";
 
+import { ChatEmptyState } from "@/components/chat/ChatEmptyState";
+import { CHAT_CONTENT_GUTTER } from "@/lib/chat-layout";
+import type { ChatMessage, ChatPageContext } from "@/types/chat";
 import { useEffect, useRef } from "react";
-import type { ChatMessage } from "@/types/chat";
 import { Message } from "./Message";
-import { MessageSquare } from "lucide-react";
 
 interface MessagesProps {
   messages: ChatMessage[];
+  pageContext: ChatPageContext;
   isLoading?: boolean;
   streamingContentLength?: number;
 }
 
-/** Scrollable message list with smooth auto-scroll to latest content. */
+/** Scrollable message list with dynamic empty state. */
 export const Messages = ({
   messages,
+  pageContext,
   isLoading = false,
   streamingContentLength = 0,
 }: MessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -32,11 +34,10 @@ export const Messages = ({
 
   return (
     <div
-      ref={containerRef}
-      className="flex max-h-[calc(100vh-3.5rem-7rem)] flex-1 flex-col overflow-y-auto scroll-smooth"
+      className={`flex min-h-0 flex-1 flex-col overflow-y-auto scroll-smooth ${CHAT_CONTENT_GUTTER}`}
     >
       {messages.length ? (
-        <>
+        <div className="w-full py-4">
           {messages.map((message, i) => {
             const isLast = i === messages.length - 1;
             const isThinking =
@@ -53,13 +54,9 @@ export const Messages = ({
             );
           })}
           <div ref={bottomRef} className="h-px shrink-0" aria-hidden="true" />
-        </>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2">
-          <MessageSquare className="size-8 text-blue-500" />
-          <h3 className="font-semibold text-xl text-white">You are all set.</h3>
-          <p className="text-zinc-500 text-sm">Ask your first question to get started.</p>
         </div>
+      ) : (
+        <ChatEmptyState pageContext={pageContext} />
       )}
     </div>
   );
