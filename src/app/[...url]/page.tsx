@@ -1,58 +1,69 @@
-
-//To catch all the webpage dynamically create a folder called [...url] inside the pages folder
-// and create a file called page.tsx inside it.
-
 import { ChatWrapper } from "@/components/ChatWrapper";
-import { ragChat } from "@/lib/rag-chat";
+import { loadChatPageData } from "@/lib/load-chat-page-data";
 import { redis } from "@/lib/redis";
-import { cookies } from "next/headers";
+import {
+  buildSessionId,
+  parseCatchAllSegments,
+  urlToNamespace,
+} from "@/lib/url-security";
+import { cookies, headers } from "next/headers";
+import { notFound } from "next/navigation";
 
-//Its from the documentation of next.js
 interface PageProps {
-  params: {
+  params: Promise<{
     url: string | string[] | undefined;
-  };
+  }>;
 }
 
-//To reconstruct the url from the array of strings
-function reconstructUrl({ url }: { url: string[] }) {
-  const decodedComponents = url.map((component) => decodeURIComponent(component));
-
-  return decodedComponents.join("//");
+function clientIpFromHeaders(headerStore: Headers): string {
+  return (
+    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip") ||
+    "unknown"
+  );
 }
 
-//The page function is a async function that takes a object as a parameter
 const Page = async ({ params }: PageProps) => {
-  //Get the session cookie from the cookies
-  const sessionCookie = cookies().get("sessionId")?.value;
-  //Reconstruct the url from the array of strings
-  const reconstructedUrl = reconstructUrl({ url: params.url as string[] });
+  const resolvedParams = await params;
+  const headerStore = await headers();
+  const sessionCookie = (await cookies()).get("sessionId")?.value;
+  const headerSession = headerStore.get("x-session-id");
 
-  //The session id is the reconstructed url and the session cookie combined globally
-  const sessionId = (reconstructedUrl + "--" + sessionCookie).replace(/\//g, "");
-  
-  //Check if the url is already indexed by using Redis to check if the url is a member of the indexed-urls set
-  //The sismember command returns 1 if the url is a member of the set and 0 if it is not a member of the set
-  //To keep track of the indexed urls we are using a set called indexed-urls not to index the same url again
-  // Its a setIsMember command in Rediswhere its checks if the member is present in the set or not
-  const isAlreadyIndexed = await redis.sismember("indexed-urls", reconstructedUrl);
+  const segments = Array.isArray(resolvedParams.url)
+    ? resolvedParams.url
+    : resolvedParams.url
+      ? [resolvedParams.url]
+      : [];
 
-  //Get the initial messages from the
-  const initialMessages = await ragChat.history.getMessages({ amount: 10, sessionId });
-
-  //If the url is not indexed then add the url to the context
-  if (!isAlreadyIndexed) {
-    await ragChat.context.add({
-      type: "html",
-      source: reconstructedUrl,
-      //The chunkOverlap and chunkSize are the parameters that are used to split the text into chunks
-      config: { chunkOverlap: 50, chunkSize: 200 },
-    });
-    //Add the url to the indexed-urls setAdd
-    await redis.sadd("indexed-urls", reconstructedUrl);
+  const parsed = await parseCatchAllSegments(segments);
+  if (!parsed.ok) {
+    notFound();
   }
-  //Return the ChatWrapper component with the sessionId and initialMessages
-  return <ChatWrapper sessionId={sessionId} initialMessages={initialMessages} />;
+
+  const { httpsUrl, canonicalKey } = parsed;
+  const namespace = urlToNamespace(canonicalKey);
+
+  const sessionPart = headerSession ?? sessionCookie ?? crypto.randomUUID();
+  const sessionId = buildSessionId(canonicalKey, sessionPart);
+
+  const isAlreadyIndexed = await redis.sismember("indexed-urls", canonicalKey);
+
+  const { initialMessages, ingestError } = await loadChatPageData({
+    sessionId,
+    httpsUrl,
+    canonicalKey,
+    namespace,
+    isAlreadyIndexed: Boolean(isAlreadyIndexed),
+    clientIp: clientIpFromHeaders(headerStore),
+  });
+
+  return (
+    <ChatWrapper
+      canonicalKey={canonicalKey}
+      initialMessages={initialMessages}
+      ingestError={ingestError}
+    />
+  );
 };
 
 export default Page;

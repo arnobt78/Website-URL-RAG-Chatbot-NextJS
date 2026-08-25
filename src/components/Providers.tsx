@@ -2,9 +2,14 @@
 
 import { PropsWithChildren } from "react";
 import { NextUIProvider } from "@nextui-org/react";
+import { Toaster } from "@/components/ui/sonner";
 
-// Providers component that wraps the NextUIProvider(one content) component to provide the NextUI theme to the entire application
-// This component is used in the _app.tsx file to wrap the entire application with the NextUIProvider component
+/** Root client providers — NextUI theme/context + Sonner toasts. */
 export const Providers = ({ children }: PropsWithChildren) => {
-  return <NextUIProvider>{children}</NextUIProvider>;
+  return (
+    <NextUIProvider>
+      {children}
+      <Toaster richColors closeButton position="top-right" />
+    </NextUIProvider>
+  );
 };

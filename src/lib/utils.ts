@@ -1,8 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// Tailwind CSS classnames function
-// This function is used to merge Tailwind CSS classnames with other classnames, not to use default Tailwind CSS classnames
+/** Merge Tailwind classes with conflict resolution (clsx + tailwind-merge). */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

@@ -1,4 +1,4 @@
 import { Redis } from "@upstash/redis";
 
-// Create a new Redis instance from the environment variables to get started with the Redis client from Upstash
+/** Upstash Redis REST client — chat history, rate limits, indexed-urls dedup set. */
 export const redis = Redis.fromEnv();

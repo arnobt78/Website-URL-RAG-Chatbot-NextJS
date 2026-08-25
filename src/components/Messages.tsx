@@ -1,18 +1,59 @@
-import { type Message as TMessage } from "ai/react";
+"use client";
+
+import { useEffect, useRef } from "react";
+import type { ChatMessage } from "@/types/chat";
 import { Message } from "./Message";
 import { MessageSquare } from "lucide-react";
 
 interface MessagesProps {
-  messages: TMessage[];
+  messages: ChatMessage[];
+  isLoading?: boolean;
+  streamingContentLength?: number;
 }
 
-export const Messages = ({ messages }: MessagesProps) => {
+/** Scrollable message list with smooth auto-scroll to latest content. */
+export const Messages = ({
+  messages,
+  isLoading = false,
+  streamingContentLength = 0,
+}: MessagesProps) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, isLoading, streamingContentLength]);
+
+  const lastMessage = messages[messages.length - 1];
+  const showThinking =
+    isLoading &&
+    lastMessage?.role === "assistant" &&
+    !lastMessage.content.trim();
+
   return (
-    <div className="flex max-h-[calc(100vh-3.5rem-7rem)] flex-1 flex-col overflow-y-auto">
+    <div
+      ref={containerRef}
+      className="flex max-h-[calc(100vh-3.5rem-7rem)] flex-1 flex-col overflow-y-auto scroll-smooth"
+    >
       {messages.length ? (
-        messages.map((message, i) => (
-          <Message key={i} content={message.content} isUserMessage={message.role === "user"} />
-        ))
+        <>
+          {messages.map((message, i) => {
+            const isLast = i === messages.length - 1;
+            const isThinking =
+              isLast && message.role === "assistant" && showThinking;
+
+            return (
+              <Message
+                key={message.id ?? i}
+                content={message.content}
+                isUserMessage={message.role === "user"}
+                createdAt={message.createdAt}
+                isThinking={isThinking}
+              />
+            );
+          })}
+          <div ref={bottomRef} className="h-px shrink-0" aria-hidden="true" />
+        </>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <MessageSquare className="size-8 text-blue-500" />

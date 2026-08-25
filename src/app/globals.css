@@ -67,3 +67,74 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hero rotating background — docs/HERO_ROTATING_BACKGROUND_SPEC.md */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1rem 4rem;
+}
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero__bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform-origin: center center;
+  transition: opacity 1.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero__bg-layer--active {
+  opacity: 1;
+}
+
+.hero__bg-layer--ken-burns {
+  animation: heroKenBurns 14s ease-in-out forwards;
+}
+
+@keyframes heroKenBurns {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(-1%, -1%, 0);
+  }
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(9, 9, 11, 0.55) 0%,
+    rgba(9, 9, 11, 0.75) 50%,
+    rgba(9, 9, 11, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__bg-layer--ken-burns {
+    animation: none;
+  }
+}
