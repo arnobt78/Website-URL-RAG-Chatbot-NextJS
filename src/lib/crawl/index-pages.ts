@@ -24,7 +24,8 @@ export type IndexPagesResult = {
 export async function indexCrawledPages(
   pages: CrawledPage[],
   namespace: string,
-  siteRootKey?: string
+  siteRootKey?: string,
+  indexedOffset = 0
 ): Promise<IndexPagesResult> {
   let indexed = 0;
   let failed = 0;
@@ -71,7 +72,7 @@ export async function indexCrawledPages(
     totalChars += document.length;
 
     if (siteRootKey) {
-      await appendRecentIndexedPage(siteRootKey, page.sourceUrl, indexed);
+      await appendRecentIndexedPage(siteRootKey, page.sourceUrl, indexedOffset + indexed);
     }
   }
 

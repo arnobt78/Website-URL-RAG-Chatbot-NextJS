@@ -31,6 +31,28 @@ export function crawlProgressPageCount(
   return phase === "indexing" ? indexed : (crawled ?? indexed);
 }
 
+export type CrawlProgressLabel = "crawl" | "embed";
+
+export type CrawlProgressDisplay = {
+  numer: number;
+  denom: number;
+  label: CrawlProgressLabel;
+};
+
+/** Phase-aware X/Y for progress UI — crawl uses discovered; embed uses scraped page count. */
+export function crawlProgressDisplay(
+  phase: CrawlJobPhase | string | undefined,
+  crawled: number,
+  indexed: number,
+  discovered: number
+): CrawlProgressDisplay {
+  if (phase === "indexing") {
+    const denom = crawled > 0 ? crawled : discovered;
+    return { numer: indexed, denom, label: "embed" };
+  }
+  return { numer: crawled, denom: discovered, label: "crawl" };
+}
+
 export function pathFromSourceUrl(sourceUrl: string): string {
   try {
     const pathname = new URL(sourceUrl).pathname;

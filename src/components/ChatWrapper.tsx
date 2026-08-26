@@ -71,6 +71,7 @@ export const ChatWrapper = ({
             indexedPages: [],
             recentPages: [],
             ingestedCharCount: undefined,
+            ingestError: undefined,
           }
         : pageContext;
 

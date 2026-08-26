@@ -13,6 +13,7 @@ import { indexRedisKey } from "@/lib/ingest-constants";
 import { redis } from "@/lib/redis";
 
 const SCRAPE_BATCH_SIZE = 4;
+const INDEX_BATCH_SIZE = 4;
 
 export const { POST } = serve<CrawlWorkflowPayload>(
   async (context) => {
@@ -58,7 +59,7 @@ export const { POST } = serve<CrawlWorkflowPayload>(
       const batch = targets.slice(i, i + SCRAPE_BATCH_SIZE);
       const batchIndex = Math.floor(i / SCRAPE_BATCH_SIZE);
       const batchResult = await context.run(`scrape-batch-${batchIndex}`, async () =>
-        scrapeCrawlTargets(batch, payload.siteRootKey)
+        scrapeCrawlTargets(batch, payload.siteRootKey, allPages.length)
       );
       allPages.push(...batchResult.pages);
       scrapeFailed += batchResult.failed;
@@ -74,9 +75,19 @@ export const { POST } = serve<CrawlWorkflowPayload>(
       status: "indexing",
     });
 
-    const indexResult = await context.run("index", async () => {
-      return indexCrawledPages(allPages, payload.namespace, payload.siteRootKey);
-    });
+    let indexResult = { indexed: 0, failed: 0, totalChars: 0 };
+    for (let i = 0; i < allPages.length; i += INDEX_BATCH_SIZE) {
+      const batch = allPages.slice(i, i + INDEX_BATCH_SIZE);
+      const batchIndex = Math.floor(i / INDEX_BATCH_SIZE);
+      const batchResult = await context.run(`index-batch-${batchIndex}`, async () =>
+        indexCrawledPages(batch, payload.namespace, payload.siteRootKey, indexResult.indexed)
+      );
+      indexResult = {
+        indexed: indexResult.indexed + batchResult.indexed,
+        failed: indexResult.failed + batchResult.failed,
+        totalChars: indexResult.totalChars + batchResult.totalChars,
+      };
+    }
 
     await context.run("complete", async () => {
       if (indexResult.indexed === 0) {

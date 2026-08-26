@@ -37,6 +37,9 @@
 | VAL-0033 | lint | `npm run lint` | **PASS** | 2026-08-27 | re-crawl UX + crawlProgressPageCount |
 | VAL-0034 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 66 passed, 1 skipped (+ live-crawl-context, crawl-progress-page-count) |
 | VAL-0035 | build | `npm run build` | **PASS** | 2026-08-27 | re-crawl stale count fix commit-ready |
+| VAL-0036 | lint | `npm run lint` | **PASS** | 2026-08-27 | crawl progress offsets + batched index |
+| VAL-0037 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 69 passed, 1 skipped (+ scrape-targets, crawlProgressDisplay) |
+| VAL-0038 | build | `npm run build` | **PASS** | 2026-08-27 | monotonic crawl/index progress commit-ready |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

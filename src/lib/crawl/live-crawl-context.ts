@@ -1,4 +1,4 @@
-import { crawlProgressPageCount, type CrawlJobPhase } from "@/lib/crawl/types";
+import { crawlProgressDisplay, type CrawlJobPhase } from "@/lib/crawl/types";
 import type { ChatPageContext } from "@/types/chat";
 
 export type LiveCrawlPoll = {
@@ -52,14 +52,20 @@ export function mergeLiveCrawlContext(
           ? base.crawlStatus
           : "running";
 
-  const progressCount = crawlProgressPageCount(live.status, live.crawled, live.indexed);
+  const phase = live.status === "idle" ? base.crawlJobPhase : live.status;
+  const display = crawlProgressDisplay(
+    phase,
+    live.crawled,
+    live.indexed,
+    live.discovered
+  );
 
   return {
     ...base,
     crawlStatus,
-    crawlJobPhase: live.status === "idle" ? base.crawlJobPhase : live.status,
-    crawledPageCount: mergeCount(progressCount, base.crawledPageCount, preferLive),
-    discoveredPageCount: mergeCount(live.discovered, base.discoveredPageCount, preferLive),
+    crawlJobPhase: phase,
+    crawledPageCount: mergeCount(display.numer, base.crawledPageCount, preferLive),
+    discoveredPageCount: mergeCount(display.denom, base.discoveredPageCount, preferLive),
     recentPages: mergeStringList(live.recentPages, base.recentPages, preferLive),
     indexedPages: mergeStringList(live.indexedPages, base.indexedPages, preferLive),
     currentPath: live.currentPath ?? base.currentPath,

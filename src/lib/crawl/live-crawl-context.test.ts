@@ -66,8 +66,10 @@ describe("mergeLiveCrawlContext", () => {
         status: "indexing",
         crawled: 10,
         indexed: 7,
+        discovered: 17,
       }
     );
     expect(merged.crawledPageCount).toBe(7);
+    expect(merged.discoveredPageCount).toBe(10);
   });
 });

@@ -6,7 +6,7 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **REQ-0010 + Phase 3 UX** — re-crawl clears stale progress via `mergeLiveCrawlContext` + shared `crawlProgressPageCount`; lint/test/build PASS (66 + 1 skipped) |
+| Current Status | **REQ-0010 + Phase 3 UX** — monotonic batch crawl/index progress via offsets + `crawlProgressDisplay`; batched embedding; re-crawl clears `ingestError`; lint/test/build PASS (69 + 1 skipped) |
 | Git baseline   | `94ccdc6` / `origin/main` (pre Jina + chat UI overhaul)                                                                                                        |
 
 ---
@@ -32,9 +32,9 @@
 
 Preserve existing structure under `src/app`, `src/components`, `src/lib`.
 
-Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl workflow or Jina fallback) → `ChatWrapper` (polls `/api/crawl/status`; merges live progress via `mergeLiveCrawlContext` + `crawlProgressPageCount`; 403/429 toasts via `crawlStatusPollFailure`) / `ChatShell` → `POST /api/chat-stream` (site-root namespace + cookie + optional `chatId` → `chatWithFallback()`).
+Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl workflow or Jina fallback) → `ChatWrapper` (polls `/api/crawl/status`; merges live progress via `mergeLiveCrawlContext` + `crawlProgressDisplay`; 403/429 toasts via `crawlStatusPollFailure`) / `ChatShell` → `POST /api/chat-stream` (site-root namespace + cookie + optional `chatId` → `chatWithFallback()`).
 
-Crawl: `buildCrawlPlan` → per-URL Firecrawl scrape with **actions** (tabs/accordions) + optional **/interact** fallback → Redis live progress → index; `CrawlProgressPanel` shows N/M + phase detail. Index snapshot in Redis (`crawl:index-meta:{siteRootKey}`, 90-day TTL). Re-crawl via `POST /api/crawl/recrawl` (`invalidateSiteIndex` → `startSiteCrawl` with `force: true`).
+Crawl: `buildCrawlPlan` → batched Firecrawl scrape (`crawledOffset`) + batched embed (`indexedOffset`, batch size 4) with **actions** (tabs/accordions) + optional **/interact** fallback → Redis live progress → index; `CrawlProgressPanel` shows phase-aware "Crawling X/Y" or "Embedding X/Y". Index snapshot in Redis (`crawl:index-meta:{siteRootKey}`, 90-day TTL). Re-crawl via `POST /api/crawl/recrawl` (`invalidateSiteIndex` → `startSiteCrawl` with `force: true`; clears stale counts + `ingestError`).
 
 Security: SSRF DNS checks (`url-security.ts`), ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
 

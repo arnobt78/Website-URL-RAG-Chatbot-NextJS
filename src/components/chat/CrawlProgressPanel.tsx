@@ -21,7 +21,9 @@ export function CrawlProgressPanel({
   phaseDetail,
 }: CrawlProgressPanelProps) {
   const stepTitle = crawlStepTitle(crawlJobPhase);
+  const isEmbedding = crawlJobPhase === "indexing";
   const hasCounter = discoveredPageCount > 0;
+  const progressLabel = isEmbedding ? "Embedding" : "Crawling";
   const progressRatio = hasCounter
     ? Math.min(100, Math.round((crawledPageCount / discoveredPageCount) * 100))
     : 0;
@@ -39,7 +41,7 @@ export function CrawlProgressPanel({
         ) : null}
         {hasCounter ? (
           <p className="text-sm text-zinc-400">
-            {crawledPageCount} / {discoveredPageCount} pages
+            {progressLabel} {crawledPageCount} / {discoveredPageCount} pages
           </p>
         ) : (
           <p className="text-sm text-zinc-400">This may take a minute.</p>

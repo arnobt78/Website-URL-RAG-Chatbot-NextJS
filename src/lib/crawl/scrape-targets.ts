@@ -102,7 +102,8 @@ export type ScrapeTargetsResult = {
 /** Scrape all targets sequentially with live Redis progress updates. */
 export async function scrapeCrawlTargets(
   targets: CrawlTarget[],
-  siteRootKey: string
+  siteRootKey: string,
+  crawledOffset = 0
 ): Promise<ScrapeTargetsResult> {
   const pages: CrawledPage[] = [];
   const seenVariants = new Set<string>();
@@ -116,7 +117,7 @@ export async function scrapeCrawlTargets(
       : `Scraping ${pathLabel}…`;
 
     await updateScrapeProgress(siteRootKey, {
-      crawled: pages.length,
+      crawled: crawledOffset + pages.length,
       currentPath: pathLabel,
       phaseDetail: detail,
     });
@@ -133,7 +134,7 @@ export async function scrapeCrawlTargets(
 
     pages.push(page);
     await updateScrapeProgress(siteRootKey, {
-      crawled: pages.length,
+      crawled: crawledOffset + pages.length,
       currentPath: pathLabel,
       phaseDetail: detail,
     });
