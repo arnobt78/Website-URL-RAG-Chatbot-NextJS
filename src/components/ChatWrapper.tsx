@@ -15,9 +15,11 @@ import {
   completeChatNavToast,
   failIngestChatNavToast,
 } from "@/lib/chat-navigation-ticker";
+import type { CrawlJobPhase } from "@/lib/crawl/types";
+import { crawlStatusPollFailure } from "@/lib/crawl/status-poll-errors";
 import type { ChatMessage, ChatPageContext } from "@/types/chat";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { toast } from "sonner";
 
 /**
@@ -46,14 +48,167 @@ export const ChatWrapper = ({
   const pendingContentRef = useRef<string | null>(null);
   const syncedRef = useRef(false);
 
+  type LiveCrawlPoll = {
+    status: CrawlJobPhase | "idle";
+    crawled: number;
+    discovered: number;
+    indexed: number;
+    recentPages: string[];
+    indexedPages: string[];
+    currentPath?: string;
+    phaseDetail?: string;
+  };
+
+  const [liveCrawl, setLiveCrawl] = useState<LiveCrawlPoll | null>(null);
+  const [forceCrawlPoll, setForceCrawlPoll] = useState(false);
+  const [recrawlLoading, setRecrawlLoading] = useState(false);
+  const crawlTerminalRef = useRef(false);
+  const pollErrorNotifiedRef = useRef(false);
+
+  const effectiveContext = useMemo((): ChatPageContext => {
+    const baseContext =
+      forceCrawlPoll && pageContext.crawlStatus !== "running"
+        ? {
+            ...pageContext,
+            indexed: false,
+            crawlStatus: "running" as const,
+            crawlJobPhase: "pending" as CrawlJobPhase,
+          }
+        : pageContext;
+
+    if (!liveCrawl || baseContext.crawlStatus !== "running") return baseContext;
+
+    const crawlStatus =
+      liveCrawl.status === "completed"
+        ? "completed"
+        : liveCrawl.status === "failed"
+          ? "failed"
+          : liveCrawl.status === "idle"
+            ? baseContext.crawlStatus
+            : "running";
+
+    const isIndexing = liveCrawl.status === "indexing";
+    const progressCount = isIndexing
+      ? liveCrawl.indexed
+      : liveCrawl.crawled || liveCrawl.indexed;
+
+    return {
+      ...baseContext,
+      crawlStatus,
+      crawlJobPhase:
+        liveCrawl.status === "idle" ? baseContext.crawlJobPhase : liveCrawl.status,
+      crawledPageCount: progressCount || baseContext.crawledPageCount,
+      discoveredPageCount: liveCrawl.discovered || baseContext.discoveredPageCount,
+      recentPages:
+        liveCrawl.recentPages.length > 0 ? liveCrawl.recentPages : baseContext.recentPages,
+      indexedPages:
+        liveCrawl.indexedPages.length > 0
+          ? liveCrawl.indexedPages
+          : baseContext.indexedPages,
+      currentPath: liveCrawl.currentPath ?? baseContext.currentPath,
+      phaseDetail: liveCrawl.phaseDetail ?? baseContext.phaseDetail,
+    };
+  }, [pageContext, liveCrawl, forceCrawlPoll]);
+
   useEffect(() => {
     clearChatNavActive();
-    if (pageContext.ingestError) {
-      failIngestChatNavToast(pageContext.ingestError);
-    } else {
+    if (effectiveContext.crawlStatus === "running") {
+      return;
+    }
+    if (effectiveContext.ingestError) {
+      failIngestChatNavToast(effectiveContext.ingestError);
+    } else if (effectiveContext.indexed) {
       completeChatNavToast();
     }
-  }, [pageContext.ingestError]);
+  }, [effectiveContext.ingestError, effectiveContext.indexed, effectiveContext.crawlStatus]);
+
+  useEffect(() => {
+    if (pageContext.crawlStatus !== "running" && !forceCrawlPoll) return;
+
+    crawlTerminalRef.current = false;
+    pollErrorNotifiedRef.current = false;
+    let cancelled = false;
+    let intervalId: number | null = null;
+
+    const stopPolling = () => {
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const notifyPollFailure = (status: number, error?: string) => {
+      if (pollErrorNotifiedRef.current) return;
+      pollErrorNotifiedRef.current = true;
+      const failure = crawlStatusPollFailure(status, error);
+      toast.error(failure.title, { description: failure.subtitle });
+      if (failure.stopPolling) {
+        stopPolling();
+        setForceCrawlPoll(false);
+      }
+    };
+
+    const poll = async () => {
+      try {
+        const res = await fetch(
+          `/api/crawl/status?siteRootKey=${encodeURIComponent(pageContext.siteRootKey)}`
+        );
+        if (cancelled) return;
+
+        if (!res.ok) {
+          let errorMessage: string | undefined;
+          try {
+            const body = (await res.json()) as { error?: string };
+            errorMessage = body.error;
+          } catch {
+            /* ignore parse errors */
+          }
+          notifyPollFailure(res.status, errorMessage);
+          return;
+        }
+
+        const data = (await res.json()) as {
+          status: CrawlJobPhase | "idle";
+          crawled?: number;
+          indexed?: number;
+          discovered?: number;
+          recentPages?: string[];
+          indexedPages?: string[];
+          currentPath?: string;
+          phaseDetail?: string;
+        };
+
+        setLiveCrawl({
+          status: data.status,
+          crawled: data.crawled ?? 0,
+          discovered: data.discovered ?? 0,
+          indexed: data.indexed ?? 0,
+          recentPages: data.recentPages ?? [],
+          indexedPages: data.indexedPages ?? [],
+          currentPath: data.currentPath,
+          phaseDetail: data.phaseDetail,
+        });
+
+        if (data.status === "completed" || data.status === "failed") {
+          if (!crawlTerminalRef.current) {
+            crawlTerminalRef.current = true;
+            setForceCrawlPoll(false);
+            stopPolling();
+            router.refresh();
+          }
+        }
+      } catch {
+        /* retry on next interval */
+      }
+    };
+
+    void poll();
+    intervalId = window.setInterval(poll, 3000);
+    return () => {
+      cancelled = true;
+      stopPolling();
+    };
+  }, [pageContext.crawlStatus, pageContext.siteRootKey, router, forceCrawlPoll]);
 
   useEffect(() => {
     if (syncedRef.current) return;
@@ -124,10 +279,12 @@ export const ChatWrapper = ({
 
   const apiChatId = activeChatId && !isLegacyChatId(activeChatId) ? activeChatId : undefined;
 
+  const isCrawling = effectiveContext.crawlStatus === "running";
+
   const handleSubmit = async (e?: FormEvent) => {
     e?.preventDefault();
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || isCrawling) return;
 
     const now = new Date().toISOString();
     const userMessage: ChatMessage = {
@@ -218,25 +375,71 @@ export const ChatWrapper = ({
     setInput(prompt);
   };
 
+  const handleRecrawl = useCallback(async () => {
+    setRecrawlLoading(true);
+    try {
+      const res = await fetch("/api/crawl/recrawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canonicalUrl: pageContext.canonicalKey }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        title?: string;
+        subtitle?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        toast.error(data.title ?? "Re-crawl failed", {
+          description: data.subtitle ?? data.error ?? "Could not start re-crawl.",
+        });
+        return;
+      }
+      setForceCrawlPoll(true);
+      setLiveCrawl({
+        status: "pending",
+        crawled: 0,
+        discovered: 0,
+        indexed: 0,
+        recentPages: [],
+        indexedPages: [],
+      });
+      toast.success("Re-crawling site…", {
+        description: "Your chat messages stay in this session.",
+      });
+      router.refresh();
+    } catch {
+      toast.error("Re-crawl failed", {
+        description: "Could not reach the crawl service. Try again shortly.",
+      });
+    } finally {
+      setRecrawlLoading(false);
+    }
+  }, [pageContext.canonicalKey, router]);
+
+  const composerBusy = isLoading || isCrawling;
+
   return (
     <ChatShell
-      pageContext={pageContext}
+      pageContext={effectiveContext}
       activeChatId={activeChatId}
       mobileSidebarOpen={mobileSidebarOpen}
       onMobileSidebarOpenChange={setMobileSidebarOpen}
       input={input}
-      isLoading={isLoading}
-      showComposerChips={messages.length === 0}
+      isLoading={composerBusy}
+      showComposerChips={messages.length === 0 && !isCrawling}
       onInputChange={handleInputChange}
       onSubmit={handleSubmit}
       onPromptSelect={handlePromptSelect}
       onSessionsChange={() => setSidebarEpoch((n) => n + 1)}
       refreshToken={sidebarEpoch}
+      onRecrawl={handleRecrawl}
+      recrawlLoading={recrawlLoading}
       messages={
         <Messages
           messages={messages}
-          pageContext={pageContext}
-          isLoading={isLoading}
+          pageContext={effectiveContext}
+          isLoading={composerBusy}
           streamingContentLength={streamingLength}
         />
       }

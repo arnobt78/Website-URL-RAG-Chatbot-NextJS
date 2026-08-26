@@ -1,5 +1,6 @@
 import { ChatWrapper } from "@/components/ChatWrapper";
 import { loadChatPageData } from "@/lib/load-chat-page-data";
+import { siteRootKeyFromCanonical } from "@/lib/crawl/site-root";
 import { indexRedisKey } from "@/lib/ingest-constants";
 import { redis } from "@/lib/redis";
 import {
@@ -50,7 +51,8 @@ const Page = async ({ params, searchParams }: PageProps) => {
   }
 
   const { httpsUrl, canonicalKey } = parsed;
-  const namespace = urlToNamespace(canonicalKey);
+  const siteRootKey = siteRootKeyFromCanonical(canonicalKey);
+  const namespace = urlToNamespace(siteRootKey);
 
   const chatParam = resolvedSearch.chat?.trim();
   const chatId = chatParam && UUID_RE.test(chatParam) ? chatParam : undefined;
@@ -58,14 +60,31 @@ const Page = async ({ params, searchParams }: PageProps) => {
   const sessionPart = headerSession ?? sessionCookie ?? crypto.randomUUID();
   const sessionId = buildSessionId(canonicalKey, sessionPart, chatId);
 
-  const isAlreadyIndexed = await redis.sismember("indexed-urls", indexRedisKey(canonicalKey));
+  const isSiteAlreadyIndexed = await redis.sismember(
+    "indexed-urls",
+    indexRedisKey(siteRootKey)
+  );
 
-  const { initialMessages, indexed, ingestError, ingestedCharCount } = await loadChatPageData({
+  const {
+    initialMessages,
+    indexed,
+    ingestError,
+    ingestedCharCount,
+    crawlStatus,
+    crawlJobPhase,
+    crawledPageCount,
+    discoveredPageCount,
+    recentPages,
+    indexedPages,
+    currentPath,
+    phaseDetail,
+  } = await loadChatPageData({
     sessionId,
     httpsUrl,
     canonicalKey,
+    siteRootKey,
     namespace,
-    isAlreadyIndexed: Boolean(isAlreadyIndexed),
+    isSiteAlreadyIndexed: Boolean(isSiteAlreadyIndexed),
     clientIp: clientIpFromHeaders(headerStore),
   });
 
@@ -76,10 +95,19 @@ const Page = async ({ params, searchParams }: PageProps) => {
         pageContext={{
           httpsUrl,
           canonicalKey,
+          siteRootKey,
           indexed,
           ingestError,
           ingestedCharCount,
           chatId,
+          crawlStatus,
+          crawlJobPhase,
+          crawledPageCount,
+          discoveredPageCount,
+          recentPages,
+          indexedPages,
+          currentPath,
+          phaseDetail,
         }}
         initialMessages={initialMessages}
       />

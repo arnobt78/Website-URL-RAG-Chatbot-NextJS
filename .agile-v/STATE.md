@@ -3,39 +3,41 @@
 | Field | Value |
 |-------|-------|
 | Cycle | **C1** |
-| Phase / Stage | Implementation complete — commit-ready |
-| Gate | GATE-0001 approved; **Human-Action remaining:** Vercel Firewall + production LLM/Jina env |
-| Status | Jina ingest + modern chat UI + CI verified; ready to commit |
+| Phase / Stage | REQ-0010 + Phase 3 UX — **committed** |
+| Gate | GATE-0001 approved; Human-Action: Vercel Firewall + production env |
+| Status | Per-URL scrape, tab/accordion actions, interact fallback, live progress, re-crawl, index snapshot, poll error toasts |
 | Git HEAD (pre-work baseline) | `94ccdc6` |
-| Last updated | 2026-08-26T00:00:00Z |
+| Last updated | 2026-08-27T01:10:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- Jina Reader ingest (`fetch-page-content.ts`) + `INDEX_CONTENT_VERSION` / namespace isolation
-- Ingest UX copy (hero, loaders); `errors.ts` precedence fix
-- Chat UI redesign: `ChatShell`, sidebar (localStorage CRUD), left/right bubbles, full-width gutters, prompt chips (composer only)
-- Multi-chat: `?chat=` UUID, `buildSessionId(..., chatId?)`, `DELETE /api/chat-history`, legacy **Previous chat** sentinel
-- GitHub Actions CI (lint/test/build + optional live Jina smoke)
-- CSP `'unsafe-eval'` for Turbopack; `suppressHydrationWarning` on `<html>`
-- Validation: lint PASS, test PASS (38 + 1 skipped), build PASS
+- REQ-0010: `buildCrawlPlan` + `scrape-targets` per-URL loop (replaces origin batch `/crawl`)
+- Hash URL expansion + resume tab click actions + FAQ accordion actions
+- Firecrawl v2 `/interact` fallback when content thin or `preferInteract` (caps via env)
+- Live progress: `currentPath`, `phaseDetail`, per-page `crawled`/`indexed` in Redis + `CrawlProgressPanel`
+- `INDEX_CONTENT_VERSION = site-crawl-v2` (forces re-index)
+- Phase 3: index snapshot (`crawl:index-meta:{siteRootKey}`, 90-day TTL), `recrawlSite` + `POST /api/crawl/recrawl`, hardened `GET /api/crawl/status` (session cookie, rate limit, `isValidSiteRootKey`)
+- UI: `IndexedPagesDialog`, hero trust rotator, re-crawl confirm in dialog
+- Poll UX: `crawlStatusPollFailure` — 403/429 toasts; stop poll on 403
+- Validation: lint PASS, test PASS (59 + 1 skipped), build PASS
 
-## Human-Action remaining
+## Known limitations
 
-1. Vercel Firewall: Bot Protection = Challenge, AI Bots = Deny
-2. Confirm Node **24.x** + LLM/Upstash/`JINA_API_KEY` on production
-3. Optional: add `JINA_API_KEY` GitHub Actions secret for live ingest smoke
-4. Deploy + smoke `/www.arnobmahmud.com` (or Wikipedia) after push
+- Universal dynamic UI (every dialog/modal/infinite scroll) not guaranteed — interact + recipes cover common patterns
+- Interact + extra scrapes use more Firecrawl credits; capped by `CRAWL_INTERACT_MAX_PAGES`
+- Workflow trigger failure after invalidate: SSR re-crawl on reload acceptable for v1
+- Live Firecrawl E2E smoke pending (manual, needs production keys)
 
 ## Next exact action
 
-Commit locally; push when ready; production smoke.
+Production smoke `www.arnobmahmud.com` (education, employers, FAQ tabs); deploy with Firecrawl + QStash env on Vercel.
 
 ## Resume command
 
 ```text
 /agile-v-core
-Load .agile-v/STATE.md. Post-push production smoke + Vercel firewall Human-Action.
+Load .agile-v/STATE.md. Production smoke after deploy with site-crawl-v2.
 ```

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Globe, Sparkles, Zap, Database, MessageSquare, Shield, Loader2, Info } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { HeroBackground } from "./HeroBackground";
+import { HeroTrustRotator } from "./HeroTrustRotator";
 import { ChatNavigationOverlay } from "./ChatNavigationOverlay";
 import { useChatNavigation } from "@/hooks/use-chat-navigation";
 import { urlToChatPath } from "@/lib/url-to-chat-path";
@@ -57,8 +58,12 @@ const FEATURES = [
 
 const STEPS = [
   { step: "01", title: "Enter a URL", desc: "Paste any public website address on the landing page." },
-  { step: "02", title: "Auto-Ingest", desc: "Jina Reader extracts readable text, then chunks embed into Upstash Vector." },
-  { step: "03", title: "Ask Anything", desc: "Stream answers grounded in the indexed page content." },
+  {
+    step: "02",
+    title: "Whole-site crawl",
+    desc: "Firecrawl maps and scrapes pages (tabs & accordions included), then embeds chunks into Upstash Vector. Jina Reader is the single-page fallback.",
+  },
+  { step: "03", title: "Ask Anything", desc: "Stream answers grounded in all indexed pages across the site." },
 ] as const;
 
 const colorMap: Record<string, string> = {
@@ -107,11 +112,15 @@ export function HomePage() {
             variants={staggerContainer(0.1, 0.1)}
             className="max-w-3xl mx-auto text-center px-4"
           >
-            <motion.div variants={revealVariants(16)} className="mb-4">
+            <motion.div variants={revealVariants(16)} className="mb-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-1.5 text-sm text-sky-300 backdrop-blur-sm">
                 <Sparkles className="size-4" />
                 {SITE_NAME}
               </span>
+            </motion.div>
+
+            <motion.div variants={revealVariants(14)}>
+              <HeroTrustRotator />
             </motion.div>
 
             {["Chat with", "Any Website"].map((line, i) => (
@@ -129,8 +138,8 @@ export function HomePage() {
               variants={revealVariants(20)}
               className="mt-6 text-lg text-zinc-300 max-w-xl mx-auto"
             >
-              Paste a URL, ingest its content into Upstash Vector, and get streaming
-              RAG-powered answers — no setup required.
+              Paste one URL to crawl the whole site, index pages into Upstash Vector, and
+              get streaming RAG-powered answers — free, no setup required.
             </motion.p>
 
             <motion.form

@@ -24,18 +24,22 @@ export const CHAT_NAV_VALIDATE_STEPS: ChatNavStep[] = [
 
 export const CHAT_NAV_INDEX_STEPS: ChatNavStep[] = [
   {
-    title: "Preparing page…",
-    subtitle: "Opening chat route",
+    title: "Discovering pages…",
+    subtitle: "Mapping site structure",
   },
   {
-    title: "Indexing content…",
-    subtitle: "Reading page via Jina Reader",
+    title: "Crawling site…",
+    subtitle: "Fetching pages via Firecrawl",
+  },
+  {
+    title: "Embedding pages…",
+    subtitle: "Building searchable context",
   },
 ];
 
 export const CHAT_NAV_COMPLETE_STEP: ChatNavStep = {
   title: "Ready to chat",
-  subtitle: "Page indexed — ask anything about this site.",
+  subtitle: "Site indexed — ask anything about this website.",
 };
 
 export const CHAT_NAV_INGEST_FAIL_STEP: ChatNavStep = {

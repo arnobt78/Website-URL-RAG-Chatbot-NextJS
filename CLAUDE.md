@@ -5,8 +5,8 @@
 | Field          | Value                                                                                                                                                          |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
-| Description    | Next.js 16 RAG chatbot: Jina ingest via `/[...url]`, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar             |
-| Current Status | **Implementation complete** — lint/test/build PASS; commit-ready; Human-Action: Vercel Firewall + production LLM/Jina env                                      |
+| Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
+| Current Status | **REQ-0010 + Phase 3 UX** — per-URL scrape, tab/accordion actions, interact fallback, live progress, index snapshot, re-crawl, poll error toasts; lint/test/build PASS (59 + 1 skipped) |
 | Git baseline   | `94ccdc6` / `origin/main` (pre Jina + chat UI overhaul)                                                                                                        |
 
 ---
@@ -17,7 +17,7 @@
 | ---------- | ------------------------------------------------------------------------------------------------------ |
 | Frontend   | Next.js 16 App Router, React 19, TypeScript, Tailwind, NextUI, Framer Motion                         |
 | Backend    | Next.js Route Handlers (Node serverless)                                                               |
-| Data       | Upstash Redis + Upstash Vector (via `@upstash/rag-chat`); Jina Reader for page text                    |
+| Data       | Upstash Redis + Upstash Vector (via `@upstash/rag-chat`); Firecrawl + QStash Workflow for site crawl; Jina Reader single-page fallback |
 | LLM (code) | Multi-provider fallback in `src/lib/ai/` (Gemini → Groq → OpenRouter → Hugging Face → optional OpenAI) |
 | Streaming  | Native `fetch` + ReadableStream (no AI SDK client)                                                     |
 | Auth       | None (anonymous `sessionId` HttpOnly cookie via `src/proxy.ts`; API binds session to cookie + `canonicalUrl` + optional `chatId`) |
@@ -32,13 +32,15 @@
 
 Preserve existing structure under `src/app`, `src/components`, `src/lib`.
 
-Core flow: `proxy.ts` → `[...url]/page.tsx` (`fetchPageContentAsText` / Jina + `loadChatPageData`) → `ChatWrapper` / `ChatShell` → `POST /api/chat-stream` (`canonicalUrl` + cookie + optional `chatId` → `chatWithFallback()`).
+Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl workflow or Jina fallback) → `ChatWrapper` (polls `/api/crawl/status` for live progress; 403/429 toasts via `crawlStatusPollFailure`) / `ChatShell` → `POST /api/chat-stream` (site-root namespace + cookie + optional `chatId` → `chatWithFallback()`).
 
-Security: SSRF DNS checks (`url-security.ts`), ingest/chat rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
+Crawl: `buildCrawlPlan` → per-URL Firecrawl scrape with **actions** (tabs/accordions) + optional **/interact** fallback → Redis live progress → index; `CrawlProgressPanel` shows N/M + phase detail. Index snapshot in Redis (`crawl:index-meta:{siteRootKey}`, 90-day TTL). Re-crawl via `POST /api/crawl/recrawl` (`invalidateSiteIndex` → `startSiteCrawl` with `force: true`).
+
+Security: SSRF DNS checks (`url-security.ts`), ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
 
 Do not invent a parallel RAG/LLM stack without an approved REQ.
 
-Details: `.agile-v/phases/01-baseline-analysis/SUMMARY.md`
+Details: `.agile-v/phases/01-baseline-analysis/SUMMARY.md`, `docs/PROJECT_PLAN.md`
 
 ---
 

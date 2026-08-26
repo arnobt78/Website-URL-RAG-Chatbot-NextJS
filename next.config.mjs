@@ -1,6 +1,27 @@
 /** @type {import('next').NextConfig} */
 // Production guardrails: security headers + immutable hashed Next static assets.
 // Mirrors vercel.json so bots cannot freely re-download /_next/static forever.
+
+function buildContentSecurityPolicy() {
+  const isDev = process.env.NODE_ENV !== "production";
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
+  const connectSrc = isDev ? "connect-src 'self' ws: wss:" : "connect-src 'self'";
+
+  return [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    connectSrc,
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -9,8 +30,7 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), geolocation=()" },
   {
     key: "Content-Security-Policy",
-    value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    value: buildContentSecurityPolicy(),
   },
 ];
 

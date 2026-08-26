@@ -1,4 +1,5 @@
 import { chatWithFallback } from "@/lib/ai/fallback-rag-chat";
+import { siteRootKeyFromCanonical } from "@/lib/crawl/site-root";
 import { allowChatRequest } from "@/lib/rate-limit";
 import {
   buildSessionId,
@@ -85,7 +86,8 @@ export const POST = async (req: NextRequest) => {
   }
 
   const sessionId = buildSessionId(urlResult.canonicalKey, cookieSessionId, chatId);
-  const namespace = urlToNamespace(urlResult.canonicalKey);
+  const siteRootKey = siteRootKeyFromCanonical(urlResult.canonicalKey);
+  const namespace = urlToNamespace(siteRootKey);
   const lastMessage = messages[messages.length - 1].content;
 
   const result = await chatWithFallback(lastMessage, {

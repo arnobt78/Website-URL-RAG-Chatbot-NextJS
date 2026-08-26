@@ -22,6 +22,8 @@ type ChatShellProps = {
   onPromptSelect?: (prompt: string) => void;
   onSessionsChange?: () => void;
   refreshToken?: number;
+  onRecrawl?: () => void | Promise<void>;
+  recrawlLoading?: boolean;
 };
 
 export function ChatShell({
@@ -38,6 +40,8 @@ export function ChatShell({
   onPromptSelect,
   onSessionsChange,
   refreshToken,
+  onRecrawl,
+  recrawlLoading,
 }: ChatShellProps) {
   return (
     <div className="relative flex h-screen w-full bg-zinc-950">
@@ -52,7 +56,11 @@ export function ChatShell({
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <ChatHeader pageContext={pageContext} />
+        <ChatHeader
+          pageContext={pageContext}
+          onRecrawl={onRecrawl}
+          recrawlLoading={recrawlLoading}
+        />
 
         <div className="flex min-h-0 flex-1 flex-col">{messages}</div>
 

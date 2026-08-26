@@ -2,7 +2,7 @@
 
 /** Timing expectation — used in hero and loader footer only (not step subtitles/toasts). */
 export const INGEST_TIMING_HINT =
-  "First ingest may take 10–20 seconds on JavaScript-heavy sites.";
+  "First site crawl may take 30–90 seconds depending on page count.";
 
 /** Scraper limitation note — combined with timing hint on hero and loader footer. */
 export const INGEST_SCRAPER_NOTE =

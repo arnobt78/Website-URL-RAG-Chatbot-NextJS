@@ -28,6 +28,30 @@ export async function allowChatRequest(ip: string): Promise<boolean> {
   return count <= CHAT_MAX_REQUESTS;
 }
 
+/** Global crawl cap: max whole-site crawl jobs per IP per hour. */
+const CRAWL_WINDOW_SECONDS = 60 * 60;
+const CRAWL_MAX_PER_IP = 3;
+
+/**
+ * Rate limiter for whole-site crawl workflow triggers.
+ */
+export async function allowCrawlRequest(ip: string): Promise<boolean> {
+  const count = await incrementWithExpiry(`rl:crawl:ip:${ip}`, CRAWL_WINDOW_SECONDS);
+  return count <= CRAWL_MAX_PER_IP;
+}
+
+/** Crawl progress poll cap — supports ~3s polling with headroom. */
+const CRAWL_STATUS_WINDOW_SECONDS = 60;
+const CRAWL_STATUS_MAX_PER_IP = 120;
+
+export async function allowCrawlStatusPoll(ip: string): Promise<boolean> {
+  const count = await incrementWithExpiry(
+    `rl:crawl-status:ip:${ip}`,
+    CRAWL_STATUS_WINDOW_SECONDS
+  );
+  return count <= CRAWL_STATUS_MAX_PER_IP;
+}
+
 /**
  * Rate limiter for SSR URL ingest (scrape + embed).
  * Applies per-IP and global caps.

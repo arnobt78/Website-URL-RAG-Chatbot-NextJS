@@ -25,6 +25,15 @@
 | VAL-0021 | lint | `npm run lint` | **PASS** | 2026-08-26 | chat UI polish + chip dedupe |
 | VAL-0022 | unit tests | `npm run test` | **PASS** | 2026-08-26 | 38 passed, 1 skipped |
 | VAL-0023 | build | `npm run build` | **PASS** | 2026-08-26 | commit-ready final |
+| VAL-0024 | lint | `npm run lint` | **PASS** | 2026-08-27 | REQ-0009 verify blockers + crawl progress UI |
+| VAL-0025 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 46 passed, 1 skipped (+ crawl site-root, url-prioritizer) |
+| VAL-0026 | build | `npm run build` | **PASS** | 2026-08-27 | `/api/crawl/workflow`, `/api/crawl/status`; Next 16.3.3 Turbopack |
+| VAL-0027 | lint | `npm run lint` | **PASS** | 2026-08-27 | REQ-0010 dynamic crawl v2 |
+| VAL-0028 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 51 passed, 1 skipped (+ url-expander, interaction-recipes) |
+| VAL-0029 | build | `npm run build` | **PASS** | 2026-08-27 | site-crawl-v2; per-URL scrape workflow |
+| VAL-0030 | lint | `npm run lint` | **PASS** | 2026-08-27 | Phase 3 UX + poll error toasts + recrawl tests |
+| VAL-0031 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 59 passed, 1 skipped (+ status-poll-errors, isValidSiteRootKey, invalidate-and-recrawl) |
+| VAL-0032 | build | `npm run build` | **PASS** | 2026-08-27 | `/api/crawl/recrawl`, `/api/crawl/status`; commit-ready |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 
