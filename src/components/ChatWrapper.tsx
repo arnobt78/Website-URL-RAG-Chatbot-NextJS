@@ -15,6 +15,10 @@ import {
   completeChatNavToast,
   failIngestChatNavToast,
 } from "@/lib/chat-navigation-ticker";
+import {
+  mergeLiveCrawlContext,
+  type LiveCrawlPoll,
+} from "@/lib/crawl/live-crawl-context";
 import type { CrawlJobPhase } from "@/lib/crawl/types";
 import { crawlStatusPollFailure } from "@/lib/crawl/status-poll-errors";
 import type { ChatMessage, ChatPageContext } from "@/types/chat";
@@ -48,17 +52,6 @@ export const ChatWrapper = ({
   const pendingContentRef = useRef<string | null>(null);
   const syncedRef = useRef(false);
 
-  type LiveCrawlPoll = {
-    status: CrawlJobPhase | "idle";
-    crawled: number;
-    discovered: number;
-    indexed: number;
-    recentPages: string[];
-    indexedPages: string[];
-    currentPath?: string;
-    phaseDetail?: string;
-  };
-
   const [liveCrawl, setLiveCrawl] = useState<LiveCrawlPoll | null>(null);
   const [forceCrawlPoll, setForceCrawlPoll] = useState(false);
   const [recrawlLoading, setRecrawlLoading] = useState(false);
@@ -73,41 +66,19 @@ export const ChatWrapper = ({
             indexed: false,
             crawlStatus: "running" as const,
             crawlJobPhase: "pending" as CrawlJobPhase,
+            crawledPageCount: 0,
+            discoveredPageCount: 0,
+            indexedPages: [],
+            recentPages: [],
+            ingestedCharCount: undefined,
           }
         : pageContext;
 
     if (!liveCrawl || baseContext.crawlStatus !== "running") return baseContext;
 
-    const crawlStatus =
-      liveCrawl.status === "completed"
-        ? "completed"
-        : liveCrawl.status === "failed"
-          ? "failed"
-          : liveCrawl.status === "idle"
-            ? baseContext.crawlStatus
-            : "running";
-
-    const isIndexing = liveCrawl.status === "indexing";
-    const progressCount = isIndexing
-      ? liveCrawl.indexed
-      : liveCrawl.crawled || liveCrawl.indexed;
-
-    return {
-      ...baseContext,
-      crawlStatus,
-      crawlJobPhase:
-        liveCrawl.status === "idle" ? baseContext.crawlJobPhase : liveCrawl.status,
-      crawledPageCount: progressCount || baseContext.crawledPageCount,
-      discoveredPageCount: liveCrawl.discovered || baseContext.discoveredPageCount,
-      recentPages:
-        liveCrawl.recentPages.length > 0 ? liveCrawl.recentPages : baseContext.recentPages,
-      indexedPages:
-        liveCrawl.indexedPages.length > 0
-          ? liveCrawl.indexedPages
-          : baseContext.indexedPages,
-      currentPath: liveCrawl.currentPath ?? baseContext.currentPath,
-      phaseDetail: liveCrawl.phaseDetail ?? baseContext.phaseDetail,
-    };
+    return mergeLiveCrawlContext(baseContext, liveCrawl, {
+      preferLiveCounts: forceCrawlPoll,
+    });
   }, [pageContext, liveCrawl, forceCrawlPoll]);
 
   useEffect(() => {
@@ -381,7 +352,7 @@ export const ChatWrapper = ({
       const res = await fetch("/api/crawl/recrawl", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ canonicalUrl: pageContext.canonicalKey }),
+        body: JSON.stringify({ canonicalUrl: pageContext.httpsUrl }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -415,7 +386,7 @@ export const ChatWrapper = ({
     } finally {
       setRecrawlLoading(false);
     }
-  }, [pageContext.canonicalKey, router]);
+  }, [pageContext.httpsUrl, router]);
 
   const composerBusy = isLoading || isCrawling;
 

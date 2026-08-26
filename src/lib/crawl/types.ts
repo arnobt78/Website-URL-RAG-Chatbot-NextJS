@@ -22,6 +22,15 @@ export function crawlStepTitle(phase: CrawlJobPhase | string | undefined): strin
   }
 }
 
+/** Progress count for crawl UI — indexing uses embedded count; else crawled (0 is valid). */
+export function crawlProgressPageCount(
+  phase: CrawlJobPhase | string | undefined,
+  crawled: number,
+  indexed: number
+): number {
+  return phase === "indexing" ? indexed : (crawled ?? indexed);
+}
+
 export function pathFromSourceUrl(sourceUrl: string): string {
   try {
     const pathname = new URL(sourceUrl).pathname;

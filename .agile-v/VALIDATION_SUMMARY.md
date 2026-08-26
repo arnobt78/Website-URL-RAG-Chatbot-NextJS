@@ -34,6 +34,9 @@
 | VAL-0030 | lint | `npm run lint` | **PASS** | 2026-08-27 | Phase 3 UX + poll error toasts + recrawl tests |
 | VAL-0031 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 59 passed, 1 skipped (+ status-poll-errors, isValidSiteRootKey, invalidate-and-recrawl) |
 | VAL-0032 | build | `npm run build` | **PASS** | 2026-08-27 | `/api/crawl/recrawl`, `/api/crawl/status`; commit-ready |
+| VAL-0033 | lint | `npm run lint` | **PASS** | 2026-08-27 | re-crawl UX + crawlProgressPageCount |
+| VAL-0034 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 66 passed, 1 skipped (+ live-crawl-context, crawl-progress-page-count) |
+| VAL-0035 | build | `npm run build` | **PASS** | 2026-08-27 | re-crawl stale count fix commit-ready |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

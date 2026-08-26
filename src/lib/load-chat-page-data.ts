@@ -10,7 +10,7 @@ import {
   startSiteCrawl,
   type SiteCrawlStatus,
 } from "@/lib/crawl/site-crawl";
-import { pathFromSourceUrl } from "@/lib/crawl/types";
+import { pathFromSourceUrl, crawlProgressPageCount } from "@/lib/crawl/types";
 import { fetchPageContentAsText } from "@/lib/fetch-page-content";
 import { indexRedisKey } from "@/lib/ingest-constants";
 import { allowIngestRequest } from "@/lib/rate-limit";
@@ -61,11 +61,10 @@ function jobProgressFields(job: CrawlJobRecord | null): Pick<
     return { crawlStatus: "idle" };
   }
   const phase = job.status;
-  const isIndexing = phase === "indexing";
   return {
     crawlStatus: crawlStatusFromJob(job),
     crawlJobPhase: phase,
-    crawledPageCount: isIndexing ? job.indexed : job.crawled || job.indexed,
+    crawledPageCount: crawlProgressPageCount(phase, job.crawled, job.indexed),
     discoveredPageCount: job.discovered,
     recentPages: job.recentPages,
     indexedPages: job.indexedPages,

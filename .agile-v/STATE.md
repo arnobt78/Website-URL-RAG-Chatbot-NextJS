@@ -3,41 +3,34 @@
 | Field | Value |
 |-------|-------|
 | Cycle | **C1** |
-| Phase / Stage | REQ-0010 + Phase 3 UX — **committed** |
+| Phase / Stage | Re-crawl UX fix — commit-ready |
 | Gate | GATE-0001 approved; Human-Action: Vercel Firewall + production env |
-| Status | Per-URL scrape, tab/accordion actions, interact fallback, live progress, re-crawl, index snapshot, poll error toasts |
-| Git HEAD (pre-work baseline) | `94ccdc6` |
-| Last updated | 2026-08-27T01:10:00Z |
+| Status | Re-crawl clears stale progress immediately; shared `crawlProgressPageCount` (SSR + client) |
+| Git HEAD (pre-work baseline) | `910e12e` |
+| Last updated | 2026-08-27T01:26:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- REQ-0010: `buildCrawlPlan` + `scrape-targets` per-URL loop (replaces origin batch `/crawl`)
-- Hash URL expansion + resume tab click actions + FAQ accordion actions
-- Firecrawl v2 `/interact` fallback when content thin or `preferInteract` (caps via env)
-- Live progress: `currentPath`, `phaseDetail`, per-page `crawled`/`indexed` in Redis + `CrawlProgressPanel`
-- `INDEX_CONTENT_VERSION = site-crawl-v2` (forces re-index)
-- Phase 3: index snapshot (`crawl:index-meta:{siteRootKey}`, 90-day TTL), `recrawlSite` + `POST /api/crawl/recrawl`, hardened `GET /api/crawl/status` (session cookie, rate limit, `isValidSiteRootKey`)
-- UI: `IndexedPagesDialog`, hero trust rotator, re-crawl confirm in dialog
-- Poll UX: `crawlStatusPollFailure` — 403/429 toasts; stop poll on 403
-- Validation: lint PASS, test PASS (59 + 1 skipped), build PASS
+- REQ-0010 + Phase 3 UX (see `910e12e`)
+- Re-crawl UX: `mergeLiveCrawlContext` + `preferLiveCounts`; reset counts/lists on re-crawl; POST `httpsUrl`
+- Shared `crawlProgressPageCount` in SSR (`load-chat-page-data`) and client poll merge
+- Validation: lint PASS, test PASS (66 + 1 skipped), build PASS
 
 ## Known limitations
 
-- Universal dynamic UI (every dialog/modal/infinite scroll) not guaranteed — interact + recipes cover common patterns
-- Interact + extra scrapes use more Firecrawl credits; capped by `CRAWL_INTERACT_MAX_PAGES`
-- Workflow trigger failure after invalidate: SSR re-crawl on reload acceptable for v1
 - Live Firecrawl E2E smoke pending (manual, needs production keys)
+- Completed-site badge uses job or snapshot `indexed` count (`??` — production OK)
 
 ## Next exact action
 
-Production smoke `www.arnobmahmud.com` (education, employers, FAQ tabs); deploy with Firecrawl + QStash env on Vercel.
+Local or Vercel smoke: re-crawl indexed site → progress shows 0/N immediately; chat on `www.arnobmahmud.com`.
 
 ## Resume command
 
 ```text
 /agile-v-core
-Load .agile-v/STATE.md. Production smoke after deploy with site-crawl-v2.
+Load .agile-v/STATE.md. Production smoke after deploy.
 ```

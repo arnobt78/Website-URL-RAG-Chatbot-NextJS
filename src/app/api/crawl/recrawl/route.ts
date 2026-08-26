@@ -6,6 +6,7 @@ import { parseUserUrlInput, urlToNamespace } from "@/lib/url-security";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+/** Accepts full https URL or host+path canonical key (same as chat-stream). */
 const recrawlBodySchema = z.object({
   canonicalUrl: z.string().min(1).max(2048),
 });
