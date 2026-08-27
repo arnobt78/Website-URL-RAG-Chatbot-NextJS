@@ -18,9 +18,10 @@ const INDEX_BATCH_SIZE = 4;
 export const { POST } = serve<CrawlWorkflowPayload>(
   async (context) => {
     const payload = context.requestPayload;
+    const { runId } = payload;
 
     await context.run("init", async () => {
-      await updateCrawlJob(payload.siteRootKey, { status: "mapping" });
+      await updateCrawlJob(payload.siteRootKey, { status: "mapping" }, { expectedRunId: runId });
     });
 
     const targets = await context.run("map", async () => {
@@ -43,11 +44,15 @@ export const { POST } = serve<CrawlWorkflowPayload>(
 
       const finalTargets = buildCrawlPlan(selected, payload.siteOriginUrl, maxPages);
 
-      await updateCrawlJob(payload.siteRootKey, {
-        status: "crawling",
-        discovered: finalTargets.length,
-        crawled: 0,
-      });
+      await updateCrawlJob(
+        payload.siteRootKey,
+        {
+          status: "crawling",
+          discovered: finalTargets.length,
+          crawled: 0,
+        },
+        { expectedRunId: runId }
+      );
 
       return finalTargets;
     });
@@ -59,20 +64,30 @@ export const { POST } = serve<CrawlWorkflowPayload>(
       const batch = targets.slice(i, i + SCRAPE_BATCH_SIZE);
       const batchIndex = Math.floor(i / SCRAPE_BATCH_SIZE);
       const batchResult = await context.run(`scrape-batch-${batchIndex}`, async () =>
-        scrapeCrawlTargets(batch, payload.siteRootKey, allPages.length)
+        scrapeCrawlTargets(batch, payload.siteRootKey, allPages.length, runId)
       );
       allPages.push(...batchResult.pages);
       scrapeFailed += batchResult.failed;
     }
 
     if (allPages.length === 0) {
-      await markCrawlJobFailed(payload.siteRootKey, "No pages could be scraped from this site.");
+      await markCrawlJobFailed(
+        payload.siteRootKey,
+        "No pages could be scraped from this site.",
+        runId
+      );
       throw new Error("No pages could be scraped from this site.");
     }
 
-    await updateCrawlJob(payload.siteRootKey, {
-      crawled: allPages.length,
-      status: "indexing",
+    await context.run("indexing-start", async () => {
+      await updateCrawlJob(
+        payload.siteRootKey,
+        {
+          crawled: allPages.length,
+          status: "indexing",
+        },
+        { expectedRunId: runId }
+      );
     });
 
     let indexResult = { indexed: 0, failed: 0, totalChars: 0 };
@@ -80,7 +95,7 @@ export const { POST } = serve<CrawlWorkflowPayload>(
       const batch = allPages.slice(i, i + INDEX_BATCH_SIZE);
       const batchIndex = Math.floor(i / INDEX_BATCH_SIZE);
       const batchResult = await context.run(`index-batch-${batchIndex}`, async () =>
-        indexCrawledPages(batch, payload.namespace, payload.siteRootKey, indexResult.indexed)
+        indexCrawledPages(batch, payload.namespace, payload.siteRootKey, indexResult.indexed, runId)
       );
       indexResult = {
         indexed: indexResult.indexed + batchResult.indexed,
@@ -91,23 +106,31 @@ export const { POST } = serve<CrawlWorkflowPayload>(
 
     await context.run("complete", async () => {
       if (indexResult.indexed === 0) {
-        await updateCrawlJob(payload.siteRootKey, {
-          status: "failed",
-          error: "No pages could be indexed from this site.",
-          indexed: 0,
-          failed: indexResult.failed + scrapeFailed,
-        });
+        await updateCrawlJob(
+          payload.siteRootKey,
+          {
+            status: "failed",
+            error: "No pages could be indexed from this site.",
+            indexed: 0,
+            failed: indexResult.failed + scrapeFailed,
+          },
+          { expectedRunId: runId }
+        );
         return;
       }
 
       await redis.sadd("indexed-urls", indexRedisKey(payload.siteRootKey));
-      await updateCrawlJob(payload.siteRootKey, {
-        status: "completed",
-        indexed: indexResult.indexed,
-        failed: indexResult.failed + scrapeFailed,
-        phaseDetail: undefined,
-        currentPath: undefined,
-      });
+      await updateCrawlJob(
+        payload.siteRootKey,
+        {
+          status: "completed",
+          indexed: indexResult.indexed,
+          failed: indexResult.failed + scrapeFailed,
+          phaseDetail: undefined,
+          currentPath: undefined,
+        },
+        { expectedRunId: runId }
+      );
 
       const completedJob = await getCrawlJob(payload.siteRootKey);
       await saveIndexSnapshot(payload.siteRootKey, {
@@ -129,7 +152,8 @@ export const { POST } = serve<CrawlWorkflowPayload>(
       if (payload?.siteRootKey) {
         await markCrawlJobFailed(
           payload.siteRootKey,
-          failResponse?.slice(0, 500) || "Site crawl workflow failed."
+          failResponse?.slice(0, 500) || "Site crawl workflow failed.",
+          payload.runId
         );
       }
     },

@@ -24,14 +24,19 @@ function capActions(actions: FirecrawlAction[] | undefined, max: number): Firecr
 
 async function updateScrapeProgress(
   siteRootKey: string,
-  args: { crawled: number; currentPath: string; phaseDetail: string }
+  args: { crawled: number; currentPath: string; phaseDetail: string },
+  runId?: string
 ): Promise<void> {
-  await updateCrawlJob(siteRootKey, {
-    status: "crawling",
-    crawled: args.crawled,
-    currentPath: args.currentPath,
-    phaseDetail: args.phaseDetail,
-  });
+  await updateCrawlJob(
+    siteRootKey,
+    {
+      status: "crawling",
+      crawled: args.crawled,
+      currentPath: args.currentPath,
+      phaseDetail: args.phaseDetail,
+    },
+    { expectedRunId: runId }
+  );
 }
 
 async function scrapeTarget(
@@ -103,7 +108,8 @@ export type ScrapeTargetsResult = {
 export async function scrapeCrawlTargets(
   targets: CrawlTarget[],
   siteRootKey: string,
-  crawledOffset = 0
+  crawledOffset = 0,
+  runId?: string
 ): Promise<ScrapeTargetsResult> {
   const pages: CrawledPage[] = [];
   const seenVariants = new Set<string>();
@@ -120,7 +126,7 @@ export async function scrapeCrawlTargets(
       crawled: crawledOffset + pages.length,
       currentPath: pathLabel,
       phaseDetail: detail,
-    });
+    }, runId);
 
     const page = await scrapeTarget(target, interactBudget);
     if (!page || page.markdown.length < MIN_SCRAPE_CHARS) {
@@ -137,7 +143,7 @@ export async function scrapeCrawlTargets(
       crawled: crawledOffset + pages.length,
       currentPath: pathLabel,
       phaseDetail: detail,
-    });
+    }, runId);
   }
 
   return { pages, failed };

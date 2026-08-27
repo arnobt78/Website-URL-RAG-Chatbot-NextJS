@@ -1,7 +1,7 @@
 # PROJECT_PLAN — Whole-Site URL RAG Chatbot
 
 **REQ:** REQ-0009 (shipped) · REQ-0010 dynamic crawl v2 (shipped) · Phase 3 UX (shipped)  
-**Status:** Core crawl + RAG + live progress + re-crawl shipped — live smoke + OSS polish remaining  
+**Status:** Crawl progress + re-crawl fixes verified locally; FAQ accordion RAG gap open  
 **Last updated:** 2026-08-27
 
 ---
@@ -97,7 +97,7 @@ flowchart TB
 - ✅ Live crawl progress: `CrawlProgressPanel`, `/api/crawl/status` poll, `currentPath`, `phaseDetail`
 - ✅ Stricter crawl rate limits in `rate-limit.ts`
 - ✅ Hero trust rotator (free, anonymous session, local chat list, whole-site RAG)
-- ✅ Re-crawl button (`POST /api/crawl/recrawl` — clears vector index, keeps chat history)
+- ✅ Re-crawl button (`POST /api/crawl/recrawl` — clears vector index, keeps chat history; always invalidates + restarts via `runId`)
 - ✅ `/api/crawl/status` session cookie + `allowCrawlStatusPoll` rate limit
 - ✅ Index snapshot for revisit (badge/dialog after job TTL expires)
 
@@ -121,10 +121,40 @@ flowchart TB
 
 | Item | Priority |
 | ---- | -------- |
-| Live smoke: `www.arnobmahmud.com` (education, employers, FAQ tabs) | **Now** |
+| **FAQ accordion answers not in RAG** — `/faq` indexed with question titles only; chat cannot answer pricing, timeline, remote, etc. | **High** |
+| **Hidden UI coverage audit** — dialog/modal pages untested (no dialog on portfolio); verify `CRAWL_INTERACT_*` + accordion selectors | Medium |
+| README GIF + OSS docs | Before public launch |
 | `hashLinksFromPage` wiring | Low |
 | `buildCrawlPlan` unit test | Low |
-| README GIF + OSS docs | Before public launch |
+
+---
+
+## Manual smoke — `www.arnobmahmud.com` (2026-08-27)
+
+### Crawl progress + re-crawl ✅ (verified)
+
+- Re-crawl from indexed badge → **Crawling X / 17** (monotonic, no batch reset)
+- Debug log: `discovered:17` → `crawled:17` → `indexed:17` → `status:completed` (runId `36e1c692-…`)
+- Terminal: `POST /api/crawl/recrawl`, many `POST /api/crawl/workflow`, continuous `GET /api/crawl/status`, then `POST /api/chat-stream` after complete
+- Long scrape steps (~45–88s) on interact-heavy targets are expected locally
+
+### RAG content gaps ❌ (fix tomorrow)
+
+| Area | Crawl | Chat result |
+| ---- | ----- | ----------- |
+| Resume tabs (`#experience`, `#education`, `#skills`) | Hash + tab-click actions in plan | ✅ Answers job history, education, skills |
+| FAQ (`/faq`) | Page in index; `FAQ expanded` target + `preferInteract` in `interaction-recipes.ts` | ❌ Only FAQ **questions** retrieved; most **answers** missing (pricing, timeline, remote, process, etc.) |
+| One FAQ item | — | ✅ “background and work authorization” answered (likely from another page) |
+| Dialog / modal pages | Not on portfolio site | ⏳ Unverified — need a site with dialog-triggered content |
+
+**Likely causes (investigate next session):**
+
+1. FAQ accordion DOM on `arnobmahmud.com` may not match `details summary` / `[data-state="closed"]` selectors in `interaction-recipes.ts`
+2. `CRAWL_INTERACT_MAX_PAGES=3` may exhaust interact budget before `/faq` expanded scrape
+3. Base `/faq` map scrape may index thin markdown (questions visible, answers collapsed) even when expanded variant fails
+4. Dialog/modal patterns not yet in interaction recipes
+
+**Code touchpoints:** `src/lib/crawl/interaction-recipes.ts`, `src/lib/crawl/scrape-targets.ts` (`firecrawlInteract` fallback), `CRAWL_INTERACT_MAX_PAGES` env
 
 ---
 
@@ -205,7 +235,7 @@ APP_BASE_URL=http://localhost:3000
 ## Success criteria
 
 - ✅ Paste `https://example.com` → multiple pages indexed (about, contact, projects)
-- ⏳ Q&A returns name, email, location when present on any crawled page (live smoke pending)
+- ⏳ Q&A returns FAQ **answers** when present in accordions (resume tabs OK; FAQ answers missing — see manual smoke)
 - ✅ Crawl progress visible; SSRF-safe; rate-limited
 - ✅ `npm run lint && npm run test && npm run build` pass
 - ⏳ Open-source README explains architecture and free-tier setup clearly

@@ -80,6 +80,7 @@ export async function startSiteCrawl(args: {
     siteRootKey: args.siteRootKey,
     siteOriginUrl,
     namespace: args.namespace,
+    runId: job.runId,
   });
 
   if (!triggered) {

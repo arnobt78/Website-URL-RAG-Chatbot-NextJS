@@ -1,6 +1,4 @@
-import { getCrawlJob } from "@/lib/crawl/crawl-job-store";
 import { recrawlSite } from "@/lib/crawl/invalidate-and-recrawl";
-import { ACTIVE_CRAWL_STATUSES } from "@/lib/crawl/site-crawl";
 import { siteRootKeyFromCanonical } from "@/lib/crawl/site-root";
 import { parseUserUrlInput, urlToNamespace } from "@/lib/url-security";
 import { NextRequest, NextResponse } from "next/server";
@@ -51,17 +49,9 @@ export async function POST(req: NextRequest) {
 
   const siteRootKey = siteRootKeyFromCanonical(urlResult.canonicalKey);
   const namespace = urlToNamespace(siteRootKey);
-  const existingJob = await getCrawlJob(siteRootKey);
-
-  if (existingJob && ACTIVE_CRAWL_STATUSES.has(existingJob.status)) {
-    return NextResponse.json({
-      ok: true,
-      crawlStatus: "running",
-      crawlJobPhase: existingJob.status,
-    });
-  }
 
   const result = await recrawlSite({
+
     siteRootKey,
     namespace,
     clientIp: clientIpFromRequest(req),

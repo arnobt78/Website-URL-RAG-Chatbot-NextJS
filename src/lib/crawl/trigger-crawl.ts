@@ -7,6 +7,7 @@ export type CrawlWorkflowPayload = {
   siteRootKey: string;
   siteOriginUrl: string;
   namespace: string;
+  runId: string;
 };
 
 export async function triggerCrawlWorkflow(payload: CrawlWorkflowPayload): Promise<boolean> {

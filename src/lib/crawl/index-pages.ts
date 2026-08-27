@@ -25,7 +25,8 @@ export async function indexCrawledPages(
   pages: CrawledPage[],
   namespace: string,
   siteRootKey?: string,
-  indexedOffset = 0
+  indexedOffset = 0,
+  runId?: string
 ): Promise<IndexPagesResult> {
   let indexed = 0;
   let failed = 0;
@@ -34,13 +35,17 @@ export async function indexCrawledPages(
   for (const page of pages) {
     if (siteRootKey) {
       const pathLabel = pathFromSourceUrl(page.sourceUrl);
-      await updateCrawlJob(siteRootKey, {
-        status: "indexing",
-        currentPath: pathLabel,
-        phaseDetail: page.label
-          ? `Embedding ${pathLabel} (${page.label})…`
-          : `Embedding ${pathLabel}…`,
-      });
+      await updateCrawlJob(
+        siteRootKey,
+        {
+          status: "indexing",
+          currentPath: pathLabel,
+          phaseDetail: page.label
+            ? `Embedding ${pathLabel} (${page.label})…`
+            : `Embedding ${pathLabel}…`,
+        },
+        { expectedRunId: runId }
+      );
     }
 
     if (page.markdown.length < MIN_PAGE_CHARS) {
@@ -72,7 +77,7 @@ export async function indexCrawledPages(
     totalChars += document.length;
 
     if (siteRootKey) {
-      await appendRecentIndexedPage(siteRootKey, page.sourceUrl, indexedOffset + indexed);
+      await appendRecentIndexedPage(siteRootKey, page.sourceUrl, indexedOffset + indexed, runId);
     }
   }
 

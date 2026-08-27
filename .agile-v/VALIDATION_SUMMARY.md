@@ -40,6 +40,10 @@
 | VAL-0036 | lint | `npm run lint` | **PASS** | 2026-08-27 | crawl progress offsets + batched index |
 | VAL-0037 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 69 passed, 1 skipped (+ scrape-targets, crawlProgressDisplay) |
 | VAL-0038 | build | `npm run build` | **PASS** | 2026-08-27 | monotonic crawl/index progress commit-ready |
+| VAL-0039 | manual smoke | local re-crawl `www.arnobmahmud.com` | **PASS (progress)** / **FAIL (FAQ RAG)** | 2026-08-27 | 17/17 crawl complete; resume tabs answer; FAQ answers missing from index |
+| VAL-0040 | lint | `npm run lint` | **PASS** | 2026-08-27 | runId re-crawl fix commit-ready |
+| VAL-0041 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 69 passed, 1 skipped |
+| VAL-0042 | build | `npm run build` | **PASS** | 2026-08-27 | runId re-crawl fix commit-ready |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

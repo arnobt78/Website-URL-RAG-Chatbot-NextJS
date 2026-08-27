@@ -13,6 +13,8 @@ export type CrawlJobRecord = {
   siteRootKey: string;
   siteOriginUrl: string;
   namespace: string;
+  /** Unique per crawl run — stale workflow steps ignore mismatched jobs. */
+  runId: string;
   discovered: number;
   crawled: number;
   indexed: number;
@@ -24,6 +26,10 @@ export type CrawlJobRecord = {
   startedAt: string;
   updatedAt: string;
   error?: string;
+};
+
+export type UpdateCrawlJobOptions = {
+  expectedRunId?: string;
 };
 
 const JOB_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -51,10 +57,14 @@ export async function saveCrawlJob(job: CrawlJobRecord): Promise<void> {
 
 export async function updateCrawlJob(
   siteRootKey: string,
-  patch: Partial<CrawlJobRecord>
+  patch: Partial<CrawlJobRecord>,
+  options?: UpdateCrawlJobOptions
 ): Promise<CrawlJobRecord | null> {
   const existing = await getCrawlJob(siteRootKey);
   if (!existing) return null;
+  if (existing.runId && options?.expectedRunId !== existing.runId) {
+    return existing;
+  }
   const updated: CrawlJobRecord = {
     ...existing,
     ...patch,
@@ -75,6 +85,7 @@ export async function createCrawlJob(args: {
     siteRootKey: args.siteRootKey,
     siteOriginUrl: args.siteOriginUrl,
     namespace: args.namespace,
+    runId: crypto.randomUUID(),
     discovered: 0,
     crawled: 0,
     indexed: 0,
@@ -89,10 +100,12 @@ export async function createCrawlJob(args: {
 export async function appendRecentIndexedPage(
   siteRootKey: string,
   sourceUrl: string,
-  indexedCount: number
+  indexedCount: number,
+  expectedRunId?: string
 ): Promise<void> {
   const existing = await getCrawlJob(siteRootKey);
   if (!existing) return;
+  if (existing.runId && expectedRunId !== existing.runId) return;
 
   const path = pathFromSourceUrl(sourceUrl);
   const recent = [...(existing.recentPages ?? [])];
@@ -106,21 +119,30 @@ export async function appendRecentIndexedPage(
   }
   const maxPages = getCrawlMaxPages();
 
-  await updateCrawlJob(siteRootKey, {
-    recentPages: recent.slice(-5),
-    indexedPages: indexed.slice(0, maxPages),
-    indexed: indexedCount,
-  });
+  await updateCrawlJob(
+    siteRootKey,
+    {
+      recentPages: recent.slice(-5),
+      indexedPages: indexed.slice(0, maxPages),
+      indexed: indexedCount,
+    },
+    { expectedRunId }
+  );
 }
 
 export async function markCrawlJobFailed(
   siteRootKey: string,
-  error: string
+  error: string,
+  expectedRunId?: string
 ): Promise<void> {
-  await updateCrawlJob(siteRootKey, {
-    status: "failed",
-    error: error.slice(0, 500),
-  });
+  await updateCrawlJob(
+    siteRootKey,
+    {
+      status: "failed",
+      error: error.slice(0, 500),
+    },
+    { expectedRunId }
+  );
 }
 
 export async function deleteCrawlJob(siteRootKey: string): Promise<void> {
