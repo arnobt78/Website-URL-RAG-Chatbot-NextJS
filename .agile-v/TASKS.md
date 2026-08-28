@@ -1,45 +1,41 @@
-# TASKS.md — Prioritized Plan (Gate 1)
+# TASKS.md — Prioritized Plan
 
-**Blocked on:** GATE-0001 human approval  
-**Rule:** No implementation until approval. After approval, execute one logical step at a time.
+**Active gate:** GATE-0011 (hidden-content crawl) — **blocked on human approval**  
+**Rule:** No implementation until GATE-0011 approval. After approval, execute waves in order.
+
+Historical C1 Waves 1–3 (REQ-0004…0010) were largely executed under prior GATE-0001 approval; see `CHANGELOG.md` / commits through `3075c34`.
 
 ---
 
-## Wave 1 — Stabilize baseline (P0)
+## Wave 1 — FAQ / accordion harvest (P0)
 
 | ID | Task | REQs | Affected files (expected) |
 |----|------|------|---------------------------|
-| TASK-0001 | Decide & document active LLM provider; sync README; add `.env.example` placeholders | REQ-0004 | `README.md`, `.env.example` (new), possibly comment cleanup in `src/lib/rag-chat.ts` |
-| TASK-0002 | Repair home/OG static assets (`next.svg`/`vercel.svg` vs `logo.svg`) | REQ-0005 | `src/app/page.tsx`, `src/app/layout.tsx`, `public/*` |
-| TASK-0003 | Run lint + production build; record evidence | REQ-0006 | `.agile-v/VALIDATION_SUMMARY.md` |
+| TASK-0011 | Deterministic expand+harvest JS for Radix/single accordion; fix FAQ recipe; unit tests | REQ-0011 | `interaction-recipes.ts`, `interaction-recipes.test.ts`, possibly shared `expand-harvest.ts` |
 
-## Wave 2 — Production guardrails (P1)
+## Wave 2 — General hidden toggles (P0)
 
 | ID | Task | REQs | Affected files (expected) |
 |----|------|------|---------------------------|
-| TASK-0004 | Add security headers via `next.config.mjs` (+ optional `vercel.json`) | REQ-0007 | `next.config.mjs`, `vercel.json` |
-| TASK-0005 | Add `robots.ts` / crawl guidance appropriate for a chat demo | REQ-0007 | `src/app/robots.ts` |
-| TASK-0006 | Document Human-Action: Vercel Bot Protection / AI Bots Deny | REQ-0007 | `.agile-v/GATES.md`, `docs/` only if needed |
+| TASK-0012 | Apply expand pass beyond `/faq`: details, collapsible, Read more / Show more; heuristic or always-on expand target | REQ-0011 | `interaction-recipes.ts`, `url-expander.ts` / `buildCrawlPlan`, tests |
 
-## Wave 3 — Product upgrades (P2 — optional, choose at Gate 1)
+## Wave 3 — Dialogs + budget (P0/P1)
+
+| ID | Task | REQs | Affected files (expected) |
+|----|------|------|---------------------------|
+| TASK-0013 | Dialog/modal open→harvest→close; tighten `INTERACT_PROMPT`; raise/prioritize interact budget | REQ-0011 | `interaction-recipes.ts`, `firecrawl-client.ts`, `scrape-targets.ts`, `config.ts`, `.env.example` |
+
+## Wave 4 — Prove (P0)
 
 | ID | Task | REQs | Notes |
 |----|------|------|-------|
-| TASK-0007 | Product home / URL entry UX | REQ-0009 | Only if approved |
-| TASK-0008 | Multi-provider fallback design+impl adapted to this repo | REQ-0008 | Large; may become C2 |
-| TASK-0009 | Minimal regression/smoke strategy | REQ-0010 | May WAIVE live RAG e2e |
+| TASK-0014 | Manual smoke: portfolio FAQ answers + dialog test URL; VAL entries; sync STATE/PROJECT_PLAN/CLAUDE | REQ-0011 | Dialog URL confirmed at Gate |
 
 ---
 
-## Recommended C1 approval package
+## Explicit human decisions needed at GATE-0011
 
-**Approve for implementation now:** TASK-0001 … TASK-0006 (REQ-0004…0007)  
-**Defer to C2 unless you say otherwise:** TASK-0007…0009 (REQ-0008…0010)
-
----
-
-## Explicit human decisions needed at Gate 1
-
-1. **LLM:** Keep Upstash QStash Llama-3-8B, switch to OpenAI, or plan multi-provider (REQ-0008)?
-2. **Assets:** Restore stock SVGs, switch fully to `logo.svg`, or mixed?
-3. **C1 scope:** Waves 1–2 only, or include Wave 3 items?
+1. **Scope:** Approve TASK-0011…0014 (REQ-0011) for implementation?
+2. **Dialog smoke URL:** W3C ARIA dialog demo (default in PLAN) or provide another URL?
+3. **Interact budget:** Raise default `CRAWL_INTERACT_MAX_PAGES` 3 → 8?
+4. **Expand coverage:** Heuristics when collapsibles/dialogs detected + always for FAQ-like paths (recommended), or expand every page?

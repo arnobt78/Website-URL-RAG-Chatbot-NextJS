@@ -11,3 +11,6 @@
 | RISK-0007 | Low | Open | **No `.env.example`**; `.env` exists locally (gitignored). Agents must not read secrets. | Add placeholder example only | REQ-0004 |
 | RISK-0008 | Low | Open | **Stale Next 14.2.5 / deps**; security advisories possible. | Audit after baseline green | REQ-0006 |
 | RISK-0009 | Info | Noted | Prior experimental code (scraper/Groq/etc.) was intentionally removed via `git reset --hard` + `git clean`. Do not resurrect without REQ. | Preserve baseline | DEC-0001 |
+| RISK-0010 | High | Open | **Hidden UI content missing from RAG** — FAQ answers / dialogs / toggles not indexed when collapsed (Radix single accordion confirmed on arnobmahmud.com). | REQ-0011 / GATE-0011 plan | REQ-0011 |
+| RISK-0011 | Medium | Open | **Expand/interact cost** — more actions + higher interact budget burns Firecrawl credits and lengthens crawl. | Cap targets; prioritize preferInteract; tune defaults at Gate | REQ-0011 |
+| RISK-0012 | Medium | Open | **False clicks** — expand scripts may open language/cookie/chat chrome or navigate. | Exclude menus/haspopup; no form submit; smoke test | REQ-0011 |

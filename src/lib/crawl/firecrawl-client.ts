@@ -193,8 +193,12 @@ export async function firecrawlScrapeForInteract(url: string): Promise<{
 }
 
 const INTERACT_PROMPT =
-  "Expand all collapsed sections on this page (tabs, accordions, FAQ items, Read more toggles). " +
-  "Do not submit forms or navigate away from this site. Return markdown of all visible text content.";
+  "Expand all collapsed sections on this page. For FAQ/accordion items, open each item one-by-one " +
+  "and retain every question and answer (do not leave only the last item open). " +
+  "Open content dialogs/modals, copy their body text, then close them. " +
+  "Expand Read more / Show more toggles and details/summary sections. " +
+  "Do not open language pickers, cookie banners, or chat widgets. " +
+  "Do not submit forms or navigate away from this site. Return markdown of all revealed text content.";
 
 export async function firecrawlInteract(
   scrapeId: string,

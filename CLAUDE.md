@@ -6,7 +6,7 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **REQ-0010 + Phase 3 UX** — crawl progress + `runId` re-crawl fix; FAQ accordion RAG gap open (manual smoke 2026-08-27) |
+| Current Status | **REQ-0011 DRAFT** — hidden-content crawl plan at GATE-0011; FAQ/dialog/toggle expand pending approval |
 | Git baseline   | `94ccdc6` / `origin/main` (pre Jina + chat UI overhaul)                                                                                                        |
 
 ---

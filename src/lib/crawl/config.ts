@@ -46,7 +46,7 @@ export function isFirecrawlConfigured(): boolean {
 }
 
 const DEFAULT_MAX_ACTIONS = 8;
-const DEFAULT_INTERACT_MAX_PAGES = 3;
+const DEFAULT_INTERACT_MAX_PAGES = 8;
 
 export function getCrawlMaxActionsPerPage(): number {
   const raw = process.env.CRAWL_MAX_ACTIONS_PER_PAGE?.trim();

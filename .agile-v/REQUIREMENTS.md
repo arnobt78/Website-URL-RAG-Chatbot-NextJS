@@ -86,8 +86,24 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ---
 
+## Crawl quality — hidden / interactive content
+
+### REQ-0011 — Expand and index revealable page content (FAQ, toggles, dialogs)
+**Priority:** P0  
+**Status:** DRAFT (pending GATE-0011)  
+**Description:** Whole-site crawl must index text that is only available after common UI reveals: FAQ/accordion items (including Radix single-open), `<details>`, collapsible panels, “Read more” / expand toggles, and content dialogs/modals. Deterministic Firecrawl `actions` + harvest into visible DOM are preferred; `/interact` remains a budgeted fallback. Do not submit forms or navigate off-site.  
+**Evidence paths (planned):** `src/lib/crawl/interaction-recipes.ts`, `src/lib/crawl/scrape-targets.ts`, `src/lib/crawl/firecrawl-client.ts`, `src/lib/crawl/config.ts`, `.agile-v/phases/02-hidden-content-crawl/PLAN.md`  
+**Acceptance:**
+1. Re-crawl `www.arnobmahmud.com` → chat answers FAQ **pricing**, **timeline**, and **remote** from indexed answer bodies.
+2. Dialog smoke on approved public URL → distinctive dialog body text is indexed and retrievable in chat.
+3. Unit tests cover recipe generation; `lint` + `test` + `build` PASS.
+**Linked:** TASK-0011…0014, RISK-0010, GATE-0011
+
+---
+
 ## Non-goals for C1 (unless approved)
 
 - Reintroducing the previously removed experimental scraper / Groq-only parallel stack without a REQ.
 - Reading or committing real `.env` values.
 - Unrelated refactors of UI libraries (NextUI/Shadcn) unless required by an approved REQ.
+- Phase 5 VPS / Crawl4AI self-host (deferred; not part of GATE-0011).

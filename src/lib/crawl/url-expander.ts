@@ -1,6 +1,9 @@
 import type { CrawlTarget } from "@/lib/crawl/crawl-target";
 import { dedupeTargets, targetVariantKey } from "@/lib/crawl/crawl-target";
-import { mergeTargetsWithInteractions } from "@/lib/crawl/interaction-recipes";
+import {
+  mergeTargetsWithInteractions,
+  prioritizeInteractionTargets,
+} from "@/lib/crawl/interaction-recipes";
 
 const TAB_PAGE_PATH_RE = /^\/(resume|cv|profile)(\/|$)/i;
 
@@ -104,7 +107,10 @@ export function expandCrawlTargets(
   return deduped.slice(0, Math.max(1, maxTargets));
 }
 
-/** Merge prioritized URLs, hash expansion, and interaction tab targets into final scrape plan. */
+/** Merge prioritized URLs, hash expansion, and interaction targets into final scrape plan.
+ * Cap allows expand/dialog variants beyond base page count (up to 2× maxPages).
+ * preferInteract / expand targets are ordered first so workflow batches scrape them early.
+ */
 export function buildCrawlPlan(
   selectedUrls: string[],
   siteOriginUrl: string,
@@ -120,7 +126,9 @@ export function buildCrawlPlan(
   for (const t of [...withInteractions, ...hashExpanded]) {
     if (!byKey.has(t.variantKey)) byKey.set(t.variantKey, t);
   }
-  return [...byKey.values()].slice(0, Math.max(1, maxPages));
+  const ordered = prioritizeInteractionTargets([...byKey.values()]);
+  const cap = Math.max(1, maxPages * 2);
+  return ordered.slice(0, cap);
 }
 
 /** Extract same-origin hash links from a page link list for expansion. */

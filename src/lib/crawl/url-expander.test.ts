@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { expandCrawlTargets } from "@/lib/crawl/url-expander";
+import { buildCrawlPlan, expandCrawlTargets } from "@/lib/crawl/url-expander";
 
 describe("expandCrawlTargets", () => {
   const origin = "https://www.arnobmahmud.com";
@@ -29,5 +29,22 @@ describe("expandCrawlTargets", () => {
       50
     );
     expect(targets.some((t) => t.url.includes("#experience"))).toBe(true);
+  });
+});
+
+describe("buildCrawlPlan", () => {
+  const origin = "https://example.com";
+
+  it("keeps FAQ expand when near maxPages and orders it early", () => {
+    const urls = Array.from({ length: 10 }, (_, i) => `${origin}/page-${i}`);
+    urls.push(`${origin}/faq`);
+    const plan = buildCrawlPlan(urls, origin, 10);
+    expect(plan.some((t) => t.label === "FAQ expanded")).toBe(true);
+    const faqIdx = plan.findIndex((t) => t.label === "FAQ expanded");
+    const plainIdx = plan.findIndex(
+      (t) => t.url.includes("page-0") && !t.label && !t.preferInteract
+    );
+    expect(faqIdx).toBeGreaterThanOrEqual(0);
+    if (plainIdx >= 0) expect(faqIdx).toBeLessThan(plainIdx);
   });
 });

@@ -15,6 +15,7 @@ import {
   type CrawledPage,
   type FirecrawlAction,
 } from "@/lib/crawl/firecrawl-client";
+import { prioritizeInteractionTargets } from "@/lib/crawl/interaction-recipes";
 import { pathFromSourceUrl } from "@/lib/crawl/types";
 
 function capActions(actions: FirecrawlAction[] | undefined, max: number): FirecrawlAction[] {
@@ -47,11 +48,16 @@ async function scrapeTarget(
   const actions = capActions(target.actions, maxActions);
 
   try {
+    const hasHarvestActions = actions.some(
+      (a) => a.type === "executeJavascript" && a.script.includes("rag-crawl-harvest")
+    );
     const { page } = await firecrawlScrapeUrl(target.url, {
       actions: actions.length ? actions : undefined,
       waitFor: 2000,
       formats: ["markdown", "links"],
       maxAge: 0,
+      // Keep harvest node (#rag-crawl-harvest) in markdown extractors
+      onlyMainContent: hasHarvestActions ? false : undefined,
     });
 
     let result = page;
@@ -102,6 +108,8 @@ async function scrapeTarget(
 export type ScrapeTargetsResult = {
   pages: CrawledPage[];
   failed: number;
+  /** Remaining Firecrawl /interact calls for this crawl job. */
+  interactRemaining: number;
 };
 
 /** Scrape all targets sequentially with live Redis progress updates. */
@@ -109,14 +117,21 @@ export async function scrapeCrawlTargets(
   targets: CrawlTarget[],
   siteRootKey: string,
   crawledOffset = 0,
-  runId?: string
+  runId?: string,
+  interactRemaining?: number
 ): Promise<ScrapeTargetsResult> {
   const pages: CrawledPage[] = [];
   const seenVariants = new Set<string>();
   let failed = 0;
-  const interactBudget = { remaining: getCrawlInteractMaxPages() };
+  const interactBudget = {
+    remaining:
+      typeof interactRemaining === "number"
+        ? Math.max(0, interactRemaining)
+        : getCrawlInteractMaxPages(),
+  };
+  const ordered = prioritizeInteractionTargets(targets);
 
-  for (const target of targets) {
+  for (const target of ordered) {
     const pathLabel = pathFromSourceUrl(target.url);
     const detail = target.label
       ? `Scraping ${pathLabel} (${target.label})…`
@@ -146,5 +161,5 @@ export async function scrapeCrawlTargets(
     }, runId);
   }
 
-  return { pages, failed };
+  return { pages, failed, interactRemaining: interactBudget.remaining };
 }

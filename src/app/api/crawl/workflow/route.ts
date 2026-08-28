@@ -1,6 +1,6 @@
 import { serve } from "@upstash/workflow/nextjs";
 
-import { getCrawlMaxPages } from "@/lib/crawl/config";
+import { getCrawlInteractMaxPages, getCrawlMaxPages } from "@/lib/crawl/config";
 import { getCrawlJob, updateCrawlJob, markCrawlJobFailed } from "@/lib/crawl/crawl-job-store";
 import { saveIndexSnapshot } from "@/lib/crawl/index-snapshot";
 import { firecrawlMapSite, type CrawledPage } from "@/lib/crawl/firecrawl-client";
@@ -59,15 +59,24 @@ export const { POST } = serve<CrawlWorkflowPayload>(
 
     const allPages: CrawledPage[] = [];
     let scrapeFailed = 0;
+    let interactRemaining = getCrawlInteractMaxPages();
 
     for (let i = 0; i < targets.length; i += SCRAPE_BATCH_SIZE) {
       const batch = targets.slice(i, i + SCRAPE_BATCH_SIZE);
       const batchIndex = Math.floor(i / SCRAPE_BATCH_SIZE);
+      const remainingForBatch = interactRemaining;
       const batchResult = await context.run(`scrape-batch-${batchIndex}`, async () =>
-        scrapeCrawlTargets(batch, payload.siteRootKey, allPages.length, runId)
+        scrapeCrawlTargets(
+          batch,
+          payload.siteRootKey,
+          allPages.length,
+          runId,
+          remainingForBatch
+        )
       );
       allPages.push(...batchResult.pages);
       scrapeFailed += batchResult.failed;
+      interactRemaining = batchResult.interactRemaining;
     }
 
     if (allPages.length === 0) {

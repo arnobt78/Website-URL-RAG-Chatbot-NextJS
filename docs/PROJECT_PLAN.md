@@ -121,8 +121,8 @@ flowchart TB
 
 | Item | Priority |
 | ---- | -------- |
-| **FAQ accordion answers not in RAG** — `/faq` indexed with question titles only; chat cannot answer pricing, timeline, remote, etc. | **High** |
-| **Hidden UI coverage audit** — dialog/modal pages untested (no dialog on portfolio); verify `CRAWL_INTERACT_*` + accordion selectors | Medium |
+| **REQ-0011 / GATE-0011** — FAQ accordion + dialog + general expand/harvest (plan ready, awaiting approval) | **High** |
+| Phase 5 VPS / Crawl4AI | Later |
 | README GIF + OSS docs | Before public launch |
 | `hashLinksFromPage` wiring | Low |
 | `buildCrawlPlan` unit test | Low |
@@ -153,6 +153,8 @@ flowchart TB
 2. `CRAWL_INTERACT_MAX_PAGES=3` may exhaust interact budget before `/faq` expanded scrape
 3. Base `/faq` map scrape may index thin markdown (questions visible, answers collapsed) even when expanded variant fails
 4. Dialog/modal patterns not yet in interaction recipes
+
+**Root cause confirmed 2026-08-28:** Radix Accordion; closed answer panels empty in DOM; single-open leaves one answer. Plan: `.agile-v/phases/02-hidden-content-crawl/PLAN.md` (GATE-0011).
 
 **Code touchpoints:** `src/lib/crawl/interaction-recipes.ts`, `src/lib/crawl/scrape-targets.ts` (`firecrawlInteract` fallback), `CRAWL_INTERACT_MAX_PAGES` env
 

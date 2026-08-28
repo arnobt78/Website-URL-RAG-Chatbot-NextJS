@@ -57,3 +57,12 @@ Append-only. Do not rewrite prior entries.
 | Decision | Bot Protection Challenge + AI Bots Deny must be enabled in Vercel dashboard (not expressible fully in repo). |
 | Rationale | Playbook §1.1; no impact on normal users. |
 | Linked | REQ-0007 |
+
+## DEC-0007 — Hidden-content crawl plan (REQ-0011); freeze until GATE-0011
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-28T20:54:00Z |
+| Agent | Agile V Orchestrator |
+| Decision | New REQ-0011 for FAQ/accordion/dialog/toggle expand+harvest. Root cause: Radix single accordion leaves answers out of DOM until opened; current `[data-state=closed]` click-all is insufficient. Implementation frozen pending GATE-0011. Phase 5 VPS out of this gate. |
+| Rationale | Protocol §4; user requested plan-first for remaining RAG blockers. |
+| Linked | REQ-0011, GATE-0011, TASK-0011…0014 |

@@ -5,9 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Stage | After Requirements + Analysis; before Synthesis (Build) |
-| Status | **PENDING** |
-| Cycle | C1 |
-| Resume token | `C1-GATE1-2026-08-25` |
+| Status | **RESOLVED** (see APPROVALS.md; historical) |
 
 ### Evidence Summary
 ```
@@ -37,5 +35,40 @@ Until this appears in `APPROVALS.md` (or explicit chat approval matching the tok
 
 | Field | Value |
 |-------|-------|
-| Status | NOT STARTED |
+| Status | NOT STARTED (firewall Human-Action may still be open) |
 | Prereqs | VALIDATION_SUMMARY, EVAL_RESULTS (or WAIVE), Red Team verification |
+
+---
+
+## GATE-0011 — Human Gate 1 (Hidden-content crawl plan)
+
+| Field | Value |
+|-------|-------|
+| Stage | After analysis + PLAN; before Synthesis (Build) for REQ-0011 |
+| Status | **PENDING** |
+| Cycle | C1 |
+| Resume token | `C1-GATE1-HIDDEN-2026-08-28` |
+| Plan | `.agile-v/phases/02-hidden-content-crawl/PLAN.md` |
+
+### Evidence Summary
+```
+Scope: planned REQ-0011 FAQ/accordion/dialog/toggle crawl | Traceability: REQ-0011, TASK-0011..0014
+Findings: PASS root-cause (Radix single accordion; answers absent until open; click-all data-state insufficient)
+Decision Points: dialog smoke URL; interact budget 3→8; expand heuristics vs all pages
+Log: 2026-08-28T20:54:00Z | ORCHESTRATOR | PLAN_READY | awaiting human | GATE-0011
+```
+
+### Approve by recording below (human)
+
+```text
+APPROVED: GATE-0011
+resume_token: C1-GATE1-HIDDEN-2026-08-28
+scope: TASK-0011..0014 / custom
+dialog_url: [W3C ARIA dialog demo | <your URL>]
+interact_budget: [8 | keep 3 | other]
+expand_mode: [heuristics+faq | every page]
+approver: <name>
+date: <ISO>
+```
+
+Until this appears in `APPROVALS.md` (or explicit chat approval matching the token), **no implementation** for REQ-0011.

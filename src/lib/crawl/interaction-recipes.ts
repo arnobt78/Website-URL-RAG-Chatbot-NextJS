@@ -1,8 +1,14 @@
 import type { CrawlTarget } from "@/lib/crawl/crawl-target";
 import { targetVariantKey } from "@/lib/crawl/crawl-target";
+import {
+  DIALOG_PATH_RE,
+  FAQ_LIKE_PATH_RE,
+  dialogHarvestActions,
+  expandHarvestActions,
+  isCrawlExpandHiddenEnabled,
+} from "@/lib/crawl/expand-harvest";
 import type { FirecrawlAction } from "@/lib/crawl/firecrawl-client";
 
-const FAQ_PATH_RE = /^\/faq(\/|$)/i;
 const TAB_PAGE_PATH_RE = /^\/(resume|cv|profile)(\/|$)/i;
 
 const RESUME_TAB_CLICKS: { label: string }[] = [
@@ -41,15 +47,32 @@ function clickTabByLabel(label: string): FirecrawlAction[] {
   ];
 }
 
-/** Build extra scrape targets with tab-click actions (deterministic, no AI). */
-export function interactionTargetsForPage(baseUrl: string): CrawlTarget[] {
+function basePageUrl(url: string): string {
+  return url.split("#")[0]!;
+}
+
+function actionsContainHarvest(actions: FirecrawlAction[] | undefined): boolean {
+  return Boolean(
+    actions?.some(
+      (a) => a.type === "executeJavascript" && a.script.includes("rag-crawl-harvest")
+    )
+  );
+}
+
+/** Build extra scrape targets with tab-click / expand / dialog actions (deterministic). */
+export function interactionTargetsForPage(
+  baseUrl: string,
+  options?: { expandHidden?: boolean }
+): CrawlTarget[] {
   const pathname = pathnameOf(baseUrl);
+  const pageUrl = basePageUrl(baseUrl);
+  const expandHidden = options?.expandHidden ?? isCrawlExpandHiddenEnabled();
   const targets: CrawlTarget[] = [];
 
   if (TAB_PAGE_PATH_RE.test(pathname)) {
     for (const tab of RESUME_TAB_CLICKS) {
       targets.push({
-        url: baseUrl.split("#")[0]!,
+        url: pageUrl,
         variantKey: targetVariantKey(baseUrl, tab.label),
         label: tab.label,
         actions: clickTabByLabel(tab.label.replace(" tab", "")),
@@ -57,40 +80,61 @@ export function interactionTargetsForPage(baseUrl: string): CrawlTarget[] {
     }
   }
 
-  if (FAQ_PATH_RE.test(pathname)) {
+  const faqLike = FAQ_LIKE_PATH_RE.test(pathname);
+  const dialogLike = DIALOG_PATH_RE.test(pathname) || DIALOG_PATH_RE.test(pageUrl);
+
+  if (expandHidden || faqLike) {
+    const expandLabel = faqLike ? "FAQ expanded" : "Expanded content";
+    const expandVariant = faqLike ? "faq-expanded" : "expanded-content";
     targets.push({
-      url: baseUrl.split("#")[0]!,
-      variantKey: targetVariantKey(baseUrl, "faq-expanded"),
-      label: "FAQ expanded",
+      url: pageUrl,
+      variantKey: targetVariantKey(baseUrl, expandVariant),
+      label: expandLabel,
+      // FAQ/dialog keep interact fallback; general expand relies on deterministic harvest
+      preferInteract: faqLike || dialogLike,
+      actions: expandHarvestActions(),
+    });
+  }
+
+  if (dialogLike) {
+    targets.push({
+      url: pageUrl,
+      variantKey: targetVariantKey(baseUrl, "dialogs-expanded"),
+      label: "Dialogs expanded",
       preferInteract: true,
-      actions: [
-        waitMs(1000),
-        {
-          type: "executeJavascript",
-          script: `(function(){
-            document.querySelectorAll('details:not([open]) summary').forEach(function(s){ s.click(); });
-            document.querySelectorAll('[data-state="closed"]').forEach(function(el){ el.click(); });
-            return true;
-          })()`,
-        },
-        waitMs(1500),
-      ],
+      actions: dialogHarvestActions(),
     });
   }
 
   return targets;
 }
 
-export function mergeTargetsWithInteractions(baseTargets: CrawlTarget[]): CrawlTarget[] {
+export function mergeTargetsWithInteractions(
+  baseTargets: CrawlTarget[],
+  options?: { expandHidden?: boolean }
+): CrawlTarget[] {
+  const expandHidden = options?.expandHidden ?? isCrawlExpandHiddenEnabled();
   const seen = new Set(baseTargets.map((t) => t.variantKey));
   const merged = [...baseTargets];
+  const pagesSeen = new Set<string>();
 
   for (const base of baseTargets) {
-    const pathname = pathnameOf(base.url);
-    if (!TAB_PAGE_PATH_RE.test(pathname) && !FAQ_PATH_RE.test(pathname)) continue;
+    const withoutHash = basePageUrl(base.url);
+    const pageKey = withoutHash.toLowerCase();
+    if (pagesSeen.has(pageKey)) continue;
+    pagesSeen.add(pageKey);
 
-    const withoutHash = base.url.split("#")[0]!;
-    for (const extra of interactionTargetsForPage(withoutHash)) {
+    const pathname = pathnameOf(withoutHash);
+    const shouldExpand =
+      expandHidden ||
+      FAQ_LIKE_PATH_RE.test(pathname) ||
+      TAB_PAGE_PATH_RE.test(pathname) ||
+      DIALOG_PATH_RE.test(pathname) ||
+      DIALOG_PATH_RE.test(withoutHash);
+
+    if (!shouldExpand && !TAB_PAGE_PATH_RE.test(pathname)) continue;
+
+    for (const extra of interactionTargetsForPage(withoutHash, { expandHidden })) {
       if (seen.has(extra.variantKey)) continue;
       seen.add(extra.variantKey);
       merged.push(extra);
@@ -98,4 +142,20 @@ export function mergeTargetsWithInteractions(baseTargets: CrawlTarget[]): CrawlT
   }
 
   return merged;
+}
+
+/** Prefer interact/expand targets so interact budget is not exhausted by plain pages. */
+export function prioritizeInteractionTargets(targets: CrawlTarget[]): CrawlTarget[] {
+  return [...targets].sort((a, b) => {
+    const score = (t: CrawlTarget) => {
+      let s = 0;
+      if (t.preferInteract) s += 4;
+      if (t.label?.toLowerCase().includes("faq")) s += 3;
+      if (t.label?.toLowerCase().includes("dialog")) s += 3;
+      if (t.label?.toLowerCase().includes("expanded")) s += 2;
+      if (actionsContainHarvest(t.actions)) s += 1;
+      return s;
+    };
+    return score(b) - score(a);
+  });
 }
