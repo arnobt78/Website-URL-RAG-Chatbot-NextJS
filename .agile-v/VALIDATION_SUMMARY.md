@@ -44,6 +44,10 @@
 | VAL-0040 | lint | `npm run lint` | **PASS** | 2026-08-27 | runId re-crawl fix commit-ready |
 | VAL-0041 | unit tests | `npm run test` | **PASS** | 2026-08-27 | 69 passed, 1 skipped |
 | VAL-0042 | build | `npm run build` | **PASS** | 2026-08-27 | runId re-crawl fix commit-ready |
+| VAL-0043 | lint | `npm run lint` | **PASS** | 2026-08-28 | REQ-0011 harvest polish commit-ready |
+| VAL-0044 | unit tests | `npm run test` | **PASS** | 2026-08-28 | 82 passed, 1 skipped (+ expand-harvest form/tab/read-more asserts) |
+| VAL-0045 | build | `npm run build` | **PASS** | 2026-08-28 | REQ-0011 commit-ready |
+| VAL-0046 | live matrix + chat | `scripts/e2e-hidden-content-matrix.ts` + local re-crawl/chat | **PASS** | 2026-08-28 | FAQ 673→10k+; dialog/alert/disclosure/bootstrap/read-more/APG tabs/resume; chat pricing/permit/Slack |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

@@ -26,6 +26,7 @@ describe("expand-harvest", () => {
     expect(EXPAND_HARVEST_SCRIPT).toContain(String(HARVEST_SETTLE_MS));
     expect(EXPAND_HARVEST_SCRIPT).toContain('[role="tab"]');
     expect(EXPAND_HARVEST_SCRIPT).toContain("read more");
+    expect(EXPAND_HARVEST_SCRIPT).toContain('closest("form")');
 
     expect(DIALOG_HARVEST_SCRIPT.length).toBeGreaterThan(100);
     expect(DIALOG_HARVEST_SCRIPT).toContain(RAG_HARVEST_NODE_ID);

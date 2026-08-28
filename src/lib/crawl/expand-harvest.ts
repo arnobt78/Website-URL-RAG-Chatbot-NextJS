@@ -47,7 +47,8 @@ export const EXPAND_HARVEST_SCRIPT = `(async function(){
     if (!el || !el.getAttribute) return true;
     var popup = (el.getAttribute("aria-haspopup") || "").toLowerCase();
     if (popup === "menu" || popup === "listbox" || popup === "true" || popup === "dialog") return true;
-    if (el.type === "submit") return true;
+    // Default <button> type is "submit"; only skip real form submits.
+    if (el.type === "submit" && el.closest && el.closest("form")) return true;
     var label = ((el.getAttribute("aria-label") || "") + " " + textOf(el)).toLowerCase();
     if (/cookie|consent|language|locale|chat|assistant|sign in|log in|login|download|menu|navigation|open menu|close/.test(label)) return true;
     return false;
@@ -129,12 +130,23 @@ export const EXPAND_HARVEST_SCRIPT = `(async function(){
   for (var j = 0; j < moreBtns.length; j++) {
     var el = moreBtns[j];
     var label = (el.getAttribute("aria-label") || textOf(el) || "").trim();
-    var before = textOf(el.closest("section, article, div") || el.parentElement);
+    // Prefer a real content host — nearest bare div is often just the button chrome.
+    var host =
+      el.closest("section, article, main, [role='main'], .w3-example, [class*='example']") ||
+      el.parentElement && el.parentElement.parentElement ||
+      el.parentElement ||
+      document.body;
+    var before = textOf(host);
     try { el.click(); } catch (e) {}
     await sleep(SETTLE);
-    var host = el.closest("section, article, div") || el.parentElement;
     var after = textOf(host);
-    if (after.length > before.length + 12) pushQa(label, after);
+    var newLabel = (el.getAttribute("aria-label") || textOf(el) || "").trim();
+    if (after.length > before.length + 12) {
+      pushQa(label, after);
+    } else if (/read less|show less|see less|view less/i.test(newLabel)) {
+      // Toggle worked but host text delta was tiny (e.g. wrong host); harvest body/main.
+      pushQa(label, textOf(document.querySelector("main, [role='main'], article") || document.body));
+    }
   }
 
   // APG / generic tablists (inactive panels often not in markdown until activated)
@@ -177,7 +189,7 @@ export const DIALOG_HARVEST_SCRIPT = `(async function(){
     if (!el || !el.getAttribute) return true;
     var popup = (el.getAttribute("aria-haspopup") || "").toLowerCase();
     if (popup === "menu" || popup === "listbox") return true;
-    if (el.type === "submit") return true;
+    if (el.type === "submit" && el.closest && el.closest("form")) return true;
     var label = ((el.getAttribute("aria-label") || "") + " " + textOf(el)).toLowerCase();
     if (/cookie|consent|language|locale|chat|assistant|sign in|log in|login|menu|navigation|search|skip to/.test(label)) return true;
     return false;

@@ -28,19 +28,16 @@ import {
   interactionTargetsForPage,
   mergeTargetsWithInteractions,
 } from "../src/lib/crawl/interaction-recipes";
-import type { FirecrawlAction } from "../src/lib/crawl/firecrawl-client";
 import { buildCrawlPlan } from "../src/lib/crawl/url-expander";
 
 type Scenario = {
   id: string;
   url: string;
-  mode: "expand" | "dialog" | "tabs" | "tabs-generic" | "plan";
+  mode: "expand" | "dialog" | "tabs" | "plan";
   expectAny?: RegExp[];
   minDelta?: number;
   /** Words that must appear after expand (not only in collapsed chrome). */
   mustGain?: string[];
-  /** For tabs-generic: substrings that appear only after activating non-default tabs. */
-  mustGainAfterTabs?: string[];
 };
 
 const key = process.env.FIRECRAWL_API_KEY?.trim();
@@ -54,63 +51,46 @@ async function scrape(
   actions: unknown[],
   onlyMainContent: boolean
 ): Promise<string> {
-  const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url,
-      formats: ["markdown"],
-      onlyMainContent,
-      maxAge: 0,
-      waitFor: 2500,
-      actions,
-    }),
-    signal: AbortSignal.timeout(180_000),
-  });
-  const body = (await res.json()) as {
-    success?: boolean;
-    error?: string;
-    data?: { markdown?: string };
-  };
-  if (!body.success) throw new Error(body.error || `HTTP ${res.status}`);
-  return String(body.data?.markdown ?? "");
-}
-
-/** Click every role=tab then wait — for APG-style tablists outside resume recipes. */
-function clickAllTabsActions(): FirecrawlAction[] {
-  return [
-    { type: "wait", milliseconds: 800 },
-    {
-      type: "executeJavascript",
-      script: `(async function(){
-        function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
-        var tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-        var parts = [];
-        for (var i = 0; i < tabs.length; i++) {
-          try { tabs[i].click(); } catch (e) {}
-          await sleep(400);
-          var panel = document.querySelector('[role="tabpanel"]:not([hidden])')
-            || document.querySelector('[role="tabpanel"][aria-hidden="false"]')
-            || document.querySelector('[role="tabpanel"]');
-          if (panel) parts.push((panel.innerText || panel.textContent || "").replace(/\\s+/g, " ").trim());
-        }
-        var node = document.getElementById("rag-crawl-harvest");
-        if (!node) {
-          node = document.createElement("div");
-          node.id = "rag-crawl-harvest";
-          node.setAttribute("data-rag-expanded", "true");
-          node.style.cssText = "display:block;visibility:visible;opacity:1;padding:1rem;white-space:pre-wrap;";
-          (document.querySelector("main, [role='main'], article") || document.body).appendChild(node);
-        }
-        node.textContent = parts.filter(Boolean).join("\\n\\n");
-        return parts.length;
-      })()`,
-    },
-    { type: "wait", milliseconds: 2000 },
-  ];
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+          formats: ["markdown"],
+          onlyMainContent,
+          maxAge: 0,
+          waitFor: 2500,
+          actions,
+        }),
+        signal: AbortSignal.timeout(180_000),
+      });
+      const raw = await res.text();
+      let body: {
+        success?: boolean;
+        error?: string;
+        data?: { markdown?: string };
+      };
+      try {
+        body = JSON.parse(raw) as typeof body;
+      } catch {
+        throw new Error(`HTTP ${res.status}: ${raw.slice(0, 120)}`);
+      }
+      if (!body.success) throw new Error(body.error || `HTTP ${res.status}`);
+      return String(body.data?.markdown ?? "");
+    } catch (e) {
+      lastErr = e;
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 1500 * attempt));
+      }
+    }
+  }
+  throw lastErr;
 }
 
 const scenarios: Scenario[] = [
@@ -157,7 +137,8 @@ const scenarios: Scenario[] = [
     id: "read-more-w3schools",
     url: "https://www.w3schools.com/howto/howto_js_read_more.asp",
     mode: "expand",
-    mustGain: ["artificial intelligence", "Lorem Ipsum"],
+    // Unique to #more (display:none until "Read more" click)
+    mustGain: ["venenatis dolor", "Fusce luctus", "ullamcorper ipsum"],
   },
   {
     id: "tabs-apg-manual",
@@ -237,18 +218,6 @@ async function main(): Promise<void> {
           });
           console.log(rows[rows.length - 1]);
         }
-        continue;
-      }
-
-      if (s.mode === "tabs-generic") {
-        const baseline = await scrape(s.url, [], true);
-        const harvested = await scrape(s.url, clickAllTabsActions(), false);
-        const needed = s.mustGainAfterTabs || [];
-        const gains = needed.filter((w) => harvested.includes(w));
-        const pass = gains.length >= Math.min(2, needed.length);
-        const detail = `base=${baseline.length} harvest=${harvested.length} gains=${gains.join("|")}`;
-        rows.push({ id: s.id, pass, detail });
-        console.log(detail, pass ? "PASS" : "FAIL");
         continue;
       }
 

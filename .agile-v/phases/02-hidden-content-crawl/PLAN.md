@@ -1,9 +1,10 @@
 # PLAN — Hidden / interactive content crawl (REQ-0011)
 
 **Cycle:** C1  
-**Gate:** GATE-0011 (pending approval)  
-**Status:** PLAN ONLY — no implementation until approved  
-**Git HEAD at plan time:** `3075c34`
+**Gate:** GATE-0011 (**RESOLVED**)  
+**Status:** **IMPLEMENTED + VERIFIED** (2026-08-28) — async harvest in `expand-harvest.ts`; live matrix + in-app FAQ chat smoke PASS  
+**Git HEAD at plan time:** `3075c34`  
+**Shipped:** `f4f8c04` + harvest polish (form-aware isChrome, read-more host, `[role="tab"]`)
 
 ---
 

@@ -1,8 +1,8 @@
 # PROJECT_PLAN — Whole-Site URL RAG Chatbot
 
-**REQ:** REQ-0009 (shipped) · REQ-0010 dynamic crawl v2 (shipped) · Phase 3 UX (shipped)  
-**Status:** Crawl progress + re-crawl fixes verified locally; FAQ accordion RAG gap open  
-**Last updated:** 2026-08-27
+**REQ:** REQ-0009…0010 · Phase 3 UX · **REQ-0011 hidden-content harvest (shipped)**  
+**Status:** REQ-0011 verified (FAQ/dialog/tabs/read-more); next Phase 4 OSS + scale hardening; Phase 5 Crawl4AI later  
+**Last updated:** 2026-08-28
 
 ---
 
@@ -121,42 +121,36 @@ flowchart TB
 
 | Item | Priority |
 | ---- | -------- |
-| **REQ-0011 / GATE-0011** — FAQ accordion + dialog + general expand/harvest (plan ready, awaiting approval) | **High** |
+| **Phase 4** — README GIF, architecture diagram, CONTRIBUTING/SECURITY, mocked Firecrawl CI | **High** |
+| Scale — abuse limits, budget caps, clearer crawl errors, observability | High |
 | Phase 5 VPS / Crawl4AI | Later |
-| README GIF + OSS docs | Before public launch |
 | `hashLinksFromPage` wiring | Low |
-| `buildCrawlPlan` unit test | Low |
 
 ---
 
-## Manual smoke — `www.arnobmahmud.com` (2026-08-27)
+## Manual smoke — `www.arnobmahmud.com`
 
-### Crawl progress + re-crawl ✅ (verified)
+### Crawl progress + re-crawl ✅ (verified 2026-08-27)
 
 - Re-crawl from indexed badge → **Crawling X / 17** (monotonic, no batch reset)
 - Debug log: `discovered:17` → `crawled:17` → `indexed:17` → `status:completed` (runId `36e1c692-…`)
 - Terminal: `POST /api/crawl/recrawl`, many `POST /api/crawl/workflow`, continuous `GET /api/crawl/status`, then `POST /api/chat-stream` after complete
 - Long scrape steps (~45–88s) on interact-heavy targets are expected locally
 
-### RAG content gaps ❌ (fix tomorrow)
+### Hidden-content RAG ✅ (REQ-0011 verified 2026-08-28)
 
-| Area | Crawl | Chat result |
-| ---- | ----- | ----------- |
-| Resume tabs (`#experience`, `#education`, `#skills`) | Hash + tab-click actions in plan | ✅ Answers job history, education, skills |
-| FAQ (`/faq`) | Page in index; `FAQ expanded` target + `preferInteract` in `interaction-recipes.ts` | ❌ Only FAQ **questions** retrieved; most **answers** missing (pricing, timeline, remote, process, etc.) |
-| One FAQ item | — | ✅ “background and work authorization” answered (likely from another page) |
-| Dialog / modal pages | Not on portfolio site | ⏳ Unverified — need a site with dialog-triggered content |
+| Area | Result |
+| ---- | ------ |
+| Resume tabs (`#experience`, Skills click) | ✅ Indexed + chat |
+| FAQ (`/faq` Radix accordion) | ✅ Multi-answer harvest (pricing, work permit, Slack/Teams, etc.) |
+| Dialog / alert (W3C APG) | ✅ Live harvest PASS |
+| Disclosure / Bootstrap collapse / read-more / APG tabs | ✅ Live matrix PASS |
 
-**Likely causes (investigate next session):**
+**Implementation:** `src/lib/crawl/expand-harvest.ts` (async settle; no click-all `data-state=closed`); recipes + interact budget 8; `CRAWL_EXPAND_HIDDEN` default on.
 
-1. FAQ accordion DOM on `arnobmahmud.com` may not match `details summary` / `[data-state="closed"]` selectors in `interaction-recipes.ts`
-2. `CRAWL_INTERACT_MAX_PAGES=3` may exhaust interact budget before `/faq` expanded scrape
-3. Base `/faq` map scrape may index thin markdown (questions visible, answers collapsed) even when expanded variant fails
-4. Dialog/modal patterns not yet in interaction recipes
+**Accepted limits:** CSS-hidden with no control; resume English tab-label recipe is bonus on `/resume|cv|profile` (generic `[role="tab"]` is global).
 
-**Root cause confirmed 2026-08-28:** Radix Accordion; closed answer panels empty in DOM; single-open leaves one answer. Plan: `.agile-v/phases/02-hidden-content-crawl/PLAN.md` (GATE-0011).
-
-**Code touchpoints:** `src/lib/crawl/interaction-recipes.ts`, `src/lib/crawl/scrape-targets.ts` (`firecrawlInteract` fallback), `CRAWL_INTERACT_MAX_PAGES` env
+**Code:** `expand-harvest.ts`, `interaction-recipes.ts`, `scrape-targets.ts`, `CRAWL_INTERACT_MAX_PAGES=8`, `CRAWL_EXPAND_HIDDEN=true` (defaults).
 
 ---
 
@@ -199,7 +193,8 @@ CRAWL_MAX_PAGES=100
 CRAWL_PROVIDER=firecrawl
 CRAWL_INTERACT_ENABLED=true          # default in code
 CRAWL_MAX_ACTIONS_PER_PAGE=8         # default in code
-CRAWL_INTERACT_MAX_PAGES=3           # default in code
+CRAWL_INTERACT_MAX_PAGES=8           # default in code
+CRAWL_EXPAND_HIDDEN=true             # default on; set false to disable
 QSTASH_TOKEN=
 QSTASH_CURRENT_SIGNING_KEY=
 QSTASH_NEXT_SIGNING_KEY=
@@ -237,7 +232,7 @@ APP_BASE_URL=http://localhost:3000
 ## Success criteria
 
 - ✅ Paste `https://example.com` → multiple pages indexed (about, contact, projects)
-- ⏳ Q&A returns FAQ **answers** when present in accordions (resume tabs OK; FAQ answers missing — see manual smoke)
+- ✅ Q&A returns FAQ **answers** when present in accordions (REQ-0011 harvest + chat smoke)
 - ✅ Crawl progress visible; SSRF-safe; rate-limited
 - ✅ `npm run lint && npm run test && npm run build` pass
 - ⏳ Open-source README explains architecture and free-tier setup clearly

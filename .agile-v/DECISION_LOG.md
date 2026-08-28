@@ -66,3 +66,12 @@ Append-only. Do not rewrite prior entries.
 | Decision | New REQ-0011 for FAQ/accordion/dialog/toggle expand+harvest. Root cause: Radix single accordion leaves answers out of DOM until opened; current `[data-state=closed]` click-all is insufficient. Implementation frozen pending GATE-0011. Phase 5 VPS out of this gate. |
 | Rationale | Protocol §4; user requested plan-first for remaining RAG blockers. |
 | Linked | REQ-0011, GATE-0011, TASK-0011…0014 |
+
+## DEC-0008 — REQ-0011 implemented; Phase 4/5 deferred
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-28T22:50:00Z |
+| Agent | Cursor |
+| Decision | Ship async expand/dialog harvest (`expand-harvest.ts`): no click-all closed; form-aware isChrome; read-more + `[role="tab"]`; interact default 8; expand default on. GATE-0011 resolved. Next cycle: Phase 4 OSS + abuse/budget/observability; Phase 5 Crawl4AI later — not more resume-tab special cases. |
+| Rationale | Live Firecrawl matrix + in-app FAQ chat smoke PASS; accepted limits: CSS-only with no control; resume English labels are bonus on `/resume|cv|profile`. |
+| Linked | REQ-0011, GATE-0011, VAL-0043…0046 |

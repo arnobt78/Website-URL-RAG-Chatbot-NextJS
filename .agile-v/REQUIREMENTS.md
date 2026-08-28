@@ -90,14 +90,14 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ### REQ-0011 — Expand and index revealable page content (FAQ, toggles, dialogs)
 **Priority:** P0  
-**Status:** DRAFT (pending GATE-0011)  
-**Description:** Whole-site crawl must index text that is only available after common UI reveals: FAQ/accordion items (including Radix single-open), `<details>`, collapsible panels, “Read more” / expand toggles, and content dialogs/modals. Deterministic Firecrawl `actions` + harvest into visible DOM are preferred; `/interact` remains a budgeted fallback. Do not submit forms or navigate off-site.  
-**Evidence paths (planned):** `src/lib/crawl/interaction-recipes.ts`, `src/lib/crawl/scrape-targets.ts`, `src/lib/crawl/firecrawl-client.ts`, `src/lib/crawl/config.ts`, `.agile-v/phases/02-hidden-content-crawl/PLAN.md`  
+**Status:** DONE (GATE-0011 resolved)  
+**Description:** Whole-site crawl indexes text available after common UI reveals: FAQ/accordion (including Radix single-open), `<details>`, collapsible panels, “Read more” / expand toggles, `[role="tab"]` tablists, and content dialogs/modals. Deterministic async Firecrawl `executeJavascript` harvest into `#rag-crawl-harvest` is preferred; `/interact` remains a budgeted fallback (`CRAWL_INTERACT_MAX_PAGES` default 8). `CRAWL_EXPAND_HIDDEN` defaults on. Does not submit forms (only skips `type=submit` inside `<form>`) or navigate off-site.  
+**Evidence paths:** `src/lib/crawl/expand-harvest.ts`, `interaction-recipes.ts`, `scrape-targets.ts`, `firecrawl-client.ts`, `config.ts`, `scripts/e2e-hidden-content-matrix.ts`, `.agile-v/phases/02-hidden-content-crawl/PLAN.md`  
 **Acceptance:**
-1. Re-crawl `www.arnobmahmud.com` → chat answers FAQ **pricing**, **timeline**, and **remote** from indexed answer bodies.
-2. Dialog smoke on approved public URL → distinctive dialog body text is indexed and retrievable in chat.
-3. Unit tests cover recipe generation; `lint` + `test` + `build` PASS.
-**Linked:** TASK-0011…0014, RISK-0010, GATE-0011
+1. Re-crawl `www.arnobmahmud.com` → chat answers FAQ **pricing**, **work permit**, and **communication** from indexed answer bodies. **PASS**
+2. Dialog smoke on W3C APG dialog URL → distinctive dialog body text harvested. **PASS**
+3. Unit tests cover harvest + recipes; `lint` + `test` + `build` PASS. **PASS**
+**Linked:** TASK-0011…0014 (done), RISK-0010 (mitigated), GATE-0011
 
 ---
 

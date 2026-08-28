@@ -14,3 +14,19 @@ source: user attached/confirmed plan Guardrails Deps Node24
 approver: user
 date: 2026-08-25
 ```
+
+---
+
+## GATE-0011 — Hidden-content crawl plan approval
+
+```text
+APPROVED: GATE-0011
+resume_token: C1-GATE1-HIDDEN-2026-08-28
+scope: TASK-0011..0014
+dialog_url: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/dialog/
+interact_budget: 8
+expand_mode: heuristics+faq (CRAWL_EXPAND_HIDDEN default on)
+source: user directed implement-deep + verify-deep + commit-ready
+approver: user
+date: 2026-08-28
+```
