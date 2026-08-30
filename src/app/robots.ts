@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Single crawl policy for this App Router app (do not also add public/robots.txt).
@@ -21,5 +22,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "anthropic-ai", disallow: ["/"] },
       { userAgent: "ClaudeBot", disallow: ["/"] },
     ],
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

@@ -125,7 +125,7 @@ A **Large Language Model** generates human-like text. This project supports seve
 - **Message metadata** — timestamp + one-click copy
 - **Animated landing page** — hero rotation, URL form → chat route
 - **CI** — GitHub Actions lint/test/build; optional live Jina smoke when `JINA_API_KEY` secret is set
-- **SEO & security headers** — metadata, `robots.ts`, production guardrails (CSP includes `'unsafe-eval'` for Next/Turbopack)
+- **SEO & security headers** — metadata (`src/lib/site.ts`), `robots.ts`, `sitemap.ts` (landing only), production guardrails (CSP includes `'unsafe-eval'` for Next/Turbopack)
 - **TypeScript end-to-end** — strict types, Zod validation on API
 
 ---
@@ -222,9 +222,11 @@ ai-rag-chatbot/
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx                    # Landing page (/)
-│   │   ├── layout.tsx                  # Root layout, SEO metadata
+│   │   ├── layout.tsx                  # Root layout, SEO metadata + JSON-LD
+│   │   ├── opengraph-image.tsx         # OG / Twitter share image
 │   │   ├── globals.css
 │   │   ├── robots.ts                   # Crawl rules + AI bot denies
+│   │   ├── sitemap.ts                  # Landing (/) only — chat routes noindex
 │   │   ├── api/
 │   │   │   ├── chat-stream/route.ts    # POST — streaming chat API
 │   │   │   └── chat-history/route.ts   # DELETE — clear Redis history for a chat
@@ -508,7 +510,7 @@ Landing experience with rotating hero images, stagger animations, live **“Will
 
 ### `src/lib/site.ts`
 
-Single source of truth for **SEO metadata** (`layout.tsx`) and landing copy — product name, description, keywords, canonical URL.
+Single source of truth for **SEO metadata** (`layout.tsx`, `opengraph-image.tsx`, `sitemap.ts`) and landing copy — product name, description, author, keywords, canonical demo URL.
 
 ---
 
@@ -615,7 +617,9 @@ Live demo: [scraper-rag-chatbot.vercel.app](https://scraper-rag-chatbot.vercel.a
 
 ## Keywords
 
-Website URL RAG chatbot, URL to chat, RAG, Retrieval Augmented Generation, Next.js 16, React 19, TypeScript, Upstash Vector, Upstash Redis, semantic search, website ingestion, vector database, streaming chat, Gemini API, Groq, OpenRouter free models, Hugging Face inference, multi-provider LLM fallback, Tailwind CSS, NextUI, Sonner, Vercel, serverless, Arnob Mahmud, educational project, full-stack, LLM, machine learning, context-aware AI
+Website URL RAG chatbot, URL to chat, RAG chatbot, Retrieval Augmented Generation, web page ingestion, website ingestion, website crawl, Firecrawl, QStash, Upstash Workflow, Upstash Vector, Upstash Redis, semantic search, vector database, Next.js 16, React 19, TypeScript, Tailwind CSS, multi-provider LLM, streaming AI, streaming chat, context-aware AI, Gemini API, Groq, OpenRouter, Hugging Face, Vercel, Arnob Mahmud, full-stack chatbot, educational project
+
+(Source of truth: `src/lib/site.ts` → `SITE_KEYWORDS`.)
 
 ---
 

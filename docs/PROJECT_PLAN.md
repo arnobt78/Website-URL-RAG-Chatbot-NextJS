@@ -118,6 +118,8 @@ flowchart TB
 - ✅ `docs/SELF_HOST_CRAWL.md` (Coolify DNS placeholders; no VPS secrets)
 - ✅ `services/agentic-pipeline/` — FastAPI 7-stage + MCP + notebooks
 - ✅ GATE-0015 multi-agent debate (`/v1/debate`, crawl_qa, boss validator) + `scripts/gen-local-service-env.sh`
+- ✅ Agentic fail-closed auth + extractor SSRF (`url_safety.py`)
+- ✅ SEO: `src/lib/site.ts` + root metadata / JSON-LD + `opengraph-image.tsx` + landing-only `sitemap.ts`
 
 ---
 

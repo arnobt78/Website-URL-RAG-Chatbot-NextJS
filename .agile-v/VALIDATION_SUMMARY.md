@@ -67,6 +67,9 @@
 | VAL-0063 | verify-deep + commit-ready | lint/test/build + pytest + implementation-verifier | **PASS WITH WARNINGS** | 2026-08-31 | STATE hash drift fixed this commit; Coolify still operator |
 | VAL-0064 | agentic security harden | `pytest -q` in services/agentic-pipeline | **PASS** | 2026-08-31 | 30 passed (auth fail-closed + SSRF + debate/pipeline); commit `4a4d78f` |
 | VAL-0065 | basedpyright settings | `basedpyright app/settings.py` (service venv) | **PASS** | 2026-08-31 | 0 errors; pyrightconfig + `.vscode` interpreter → agentic `.venv` |
+| VAL-0066 | lint | `npm run lint` (`eslint .`) | **PASS** | 2026-08-31 | ignores agentic `.venv` / `services/agentic-pipeline/**` |
+| VAL-0067 | unit tests | `npm run test` | **PASS** | 2026-08-31 | 103 passed, 1 skipped |
+| VAL-0068 | build | `npm run build` | **PASS** | 2026-08-31 | SEO layout + `sitemap.ts`; Next 16.3.3 Turbopack |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 

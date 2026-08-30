@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_OG_IMAGE_ALT } from "@/lib/site";
 
-export const alt = `${SITE_NAME} — Paste a URL, ingest with RAG, chat with AI`;
+export const alt = SITE_OG_IMAGE_ALT
 
 export const size = {
   width: 1200,
