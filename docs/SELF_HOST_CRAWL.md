@@ -47,16 +47,16 @@ Omit `CRAWL_PROVIDER` or set `firecrawl` to keep the SaaS path. Jina single-page
 
 ## Coolify / VPS operator checklist (you)
 
-Public steps only — use your private gitignored Hetzner guide for IPs/passwords; never commit them.
+Public steps only — use your private gitignored Hetzner guide for IPs/passwords; **never commit the Hetzner guide** (or any real IPs/passwords).
 
 1. Coolify app from [`docker/crawl4ai/docker-compose.yml`](../docker/crawl4ai/docker-compose.yml) (or image `unclecode/crawl4ai:latest`, `--shm-size=1g`).
 2. DNS e.g. `crawl4ai.<your-domain>` → Coolify proxy; TLS on.
 3. Set `CRAWL4AI_API_TOKEN` in Coolify secrets; rotate periodically.
-4. Coolify app from [`services/agentic-pipeline/`](../services/agentic-pipeline/) (Dockerfile/compose); DNS e.g. `agents.<your-domain>`; set `AGENTIC_API_TOKEN` (+ optional LLM / Crawl4AI env).
+4. Coolify app from [`services/agentic-pipeline/`](../services/agentic-pipeline/) (Dockerfile/compose); DNS e.g. `agents.<your-domain>`; set a strong `AGENTIC_API_TOKEN` (≥32 chars, not `change-me`) + optional LLM / Crawl4AI env. Do **not** set `AGENTIC_ALLOW_INSECURE_DEV` on public hosts.
 5. Vercel: keep Firecrawl **or** set `CRAWL_PROVIDER=crawl4ai` + `CRAWL4AI_BASE_URL=https://crawl4ai.<your-domain>` + token — only if production should use self-host crawl.
 6. Smoke: `GET https://crawl4ai…/health`, `POST /md` with bearer; `GET https://agents…/health`, `POST /v1/debate` with bearer.
 
-Local tokens (gitignored): `./scripts/gen-local-service-env.sh`. Debate API: `POST /v1/debate` (see service README). This service does **not** replace Next.js chat.
+Local tokens (gitignored): `./scripts/gen-local-service-env.sh`. Debate API: `POST /v1/debate` (see service README). Agentic HTTP auth is fail-closed; extractor URLs are SSRF-gated. This service does **not** replace Next.js chat. MCP stdio is local-only — do not bridge it to the network.
 
 Do **not** commit real IPs, Coolify UUIDs, or passwords. Keep private VPS runbooks out of git (or gitignored).
 

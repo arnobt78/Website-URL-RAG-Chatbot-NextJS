@@ -1,18 +1,28 @@
 from __future__ import annotations
 
-from typing import Any
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.auth import require_bearer
+from app.auth import assert_can_boot, require_bearer
 from app.debate import run_debate
 from app.pipeline import STAGE_NAMES, run_pipeline
+from app.url_safety import assert_safe_public_url
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    assert_can_boot()
+    yield
+
 
 app = FastAPI(
     title="Agentic Pipeline",
     description="7-stage extract→assemble + multi-agent debate (separate from Next.js RAG chat)",
     version="0.2.0",
+    lifespan=lifespan,
 )
 
 
@@ -45,6 +55,15 @@ class DebateResponse(BaseModel):
     trace: list[dict[str, Any]] = Field(default_factory=list)
 
 
+def _require_safe_url(url: HttpUrl) -> str:
+    raw = str(url)
+    try:
+        assert_safe_public_url(raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return raw
+
+
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -60,7 +79,8 @@ async def pipeline(
     body: PipelineRequest,
     _: None = Depends(require_bearer),
 ) -> PipelineResponse:
-    result = await run_pipeline(str(body.url), body.question.strip())
+    url = _require_safe_url(body.url)
+    result = await run_pipeline(url, body.question.strip())
     return PipelineResponse(**result)
 
 
@@ -69,5 +89,6 @@ async def debate(
     body: PipelineRequest,
     _: None = Depends(require_bearer),
 ) -> DebateResponse:
-    result = await run_debate(str(body.url), body.question.strip())
+    url = _require_safe_url(body.url)
+    result = await run_debate(url, body.question.strip())
     return DebateResponse(**result)
