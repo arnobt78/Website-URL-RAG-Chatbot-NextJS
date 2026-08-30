@@ -116,6 +116,21 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ---
 
+## Observability
+
+### REQ-0013 — Sentry same-origin tunnel + Langfuse chat tracing
+**Priority:** P0  
+**Status:** DONE (GATE-0013 resolved; Vercel env + firewall confirmed)  
+**Description:** Optional Sentry via `@sentry/nextjs` with same-origin tunnel `/api/monitoring` (ad-blocker bypass), quiet CI (`silent`/`telemetry` off spam), shared noise filters. Optional server-only Langfuse traces on `/api/chat-stream`. PostHog out. Empty keys disable both.  
+**Evidence paths:** `next.config.mjs`, `instrumentation-client.ts`, `sentry.*.config.ts`, `src/instrumentation.ts`, `src/lib/sentry-*.ts`, `src/lib/langfuse.ts`, `src/app/api/chat-stream/route.ts`, `.env.example`  
+**Acceptance:**
+1. Client events use `/api/monitoring` rewrite (not direct ingest from browser). **PASS** (routes-manifest)
+2. Empty Sentry/Langfuse env → lint/test/build PASS. **PASS**
+3. Filters drop extension noise; expected 429/403 do not ERROR-flood Langfuse. **PASS**
+**Linked:** GATE-0013, RISK-0005
+
+---
+
 ## Non-goals for C1 (unless approved)
 
 - Reintroducing the previously removed experimental scraper / Groq-only parallel stack without a REQ.

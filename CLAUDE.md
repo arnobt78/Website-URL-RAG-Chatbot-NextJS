@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **GATE-0012 RESOLVED** — REQ-0012 OSS + scale hardening done; GIF deferred; Phase 5 later |
-| Git baseline   | `2d5554e` / `origin/main` |
+| Current Status | **GATE-0013 + GATE-0002 RESOLVED** — Sentry tunnel + Langfuse; Vercel firewall/env set |
+| Git baseline   | pending commit (parent `9075d59` / `origin/main`) |
 
 ---
 
@@ -24,6 +24,7 @@
 | Sessions UI | Browser localStorage registry (`chat-sessions-storage.ts`); not multi-tenant DB                      |
 | SEO        | `src/lib/site.ts`, `opengraph-image.tsx`, `robots.ts`                                                        |
 | Deploy     | Vercel; Node **24.x**; security headers + robots; GitHub Actions CI                                   |
+| Observability | Optional Sentry (`@sentry/nextjs`, tunnel `/api/monitoring`) + Langfuse (server chat traces); disabled when DSNs/keys empty |
 | Testing    | lint (`eslint .`) + `vitest run` + `next build`; optional `test:live-ingest`                          |
 
 ---

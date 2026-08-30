@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@nextui-org/react": "^2.6.11",
+    "@sentry/nextjs": "^10.72.0",
     "@upstash/qstash": "^2.11.3",
     "@upstash/rag-chat": "2.0.3",
     "@upstash/redis": "^1.38.2",
@@ -23,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
+    "langfuse": "^3.38.20",
     "lucide-react": "^0.544.0",
     "next": "16.3.3",
     "react": "19.2.8",
@@ -73,5 +75,8 @@
     "unpdf": "1.4.0",
     "cohere-ai": "7.19.0",
     "@mapbox/node-pre-gyp": "2.0.0"
+  },
+  "allowScripts": {
+    "@sentry/cli@2.58.6": true
   }
 }

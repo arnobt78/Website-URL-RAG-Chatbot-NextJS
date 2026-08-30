@@ -105,10 +105,11 @@ flowchart TB
 
 - ⏳ README demo GIF (URL → crawl → chat) — **deferred** (optional later)
 - ✅ Architecture mermaid diagrams in README
-- ⏳ Optional: Langfuse, PostHog, Sentry — **out of GATE-0012**
+- ✅ Sentry (`/api/monitoring` tunnel) + Langfuse chat tracing (REQ-0013 / GATE-0013) — PostHog still **out**
 - ✅ Mocked Firecrawl unit tests in default CI (no live key)
 - ✅ `CONTRIBUTING.md`, issue templates (`SECURITY.md` already present)
 - ✅ Env-tunable rate limits + clearer crawl error UX (REQ-0012 Wave B)
+- ✅ Vercel production env (incl. Sentry/Langfuse) + Bot Protection / AI Bots Deny (GATE-0002 Human-Action) — **configured 2026-08-30**
 
 ### Phase 5 — Self-hosted Crawl4AI (optional) — not started
 
@@ -123,9 +124,8 @@ flowchart TB
 | Item | Priority |
 | ---- | -------- |
 | Optional README demo GIF | Later |
+| Observability SaaS extras (PostHog) | Out |
 | Phase 5 VPS / Crawl4AI | Later |
-| Observability SaaS (Langfuse/Sentry) | Later |
-| GATE-0002 Vercel firewall Human-Action | Open |
 | `hashLinksFromPage` wiring | Low |
 
 ---
@@ -174,14 +174,16 @@ Sign up at these URLs. **Never commit real keys** — use `.env` locally and Ver
 | **OpenRouter** | <https://openrouter.ai/keys> | `OPENROUTER_API_KEY` |
 | **Hugging Face** | <https://huggingface.co/settings/tokens> | `HUGGINGFACE_API_KEY` |
 
-### Optional (Phase 4 — observability)
+### Observability (REQ-0013 — shipped)
 
 | Service | URL | Env variables |
 | ------- | --- | ------------- |
-| Langfuse | <https://cloud.langfuse.com> | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL` |
-| PostHog | <https://app.posthog.com> | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` |
-| Sentry | <https://sentry.io> | `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` (CI only) |
-| Vercel | <https://vercel.com> | Deploy + env; see `docs/VERCEL_PRODUCTION_GUARDRAILS.md` |
+| Langfuse (server chat traces) | <https://cloud.langfuse.com> | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL` |
+| Sentry (tunnel `/api/monitoring`) | <https://sentry.io> | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` (upload) |
+| PostHog | — | **Not wired** (out of scope) |
+| Vercel | <https://vercel.com> | Deploy + env; Bot Protection Challenge + AI Bots Deny enabled |
+
+Portable how-to: `docs/Redis_Sentry_PostHog_INTEGRATION_GUIDE.md` (PostHog section remains reference-only).
 
 ---
 

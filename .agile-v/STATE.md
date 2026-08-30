@@ -3,35 +3,25 @@
 | Field | Value |
 |-------|-------|
 | Cycle | **C1** |
-| Phase / Stage | REQ-0012 / GATE-0012 **RESOLVED** (Phase 4 OSS + scale hardening) |
-| Gate | **GATE-0012 RESOLVED**; GATE-0011 RESOLVED; GATE-0002 firewall may remain open |
-| Status | REQ-0012 DONE — Waves A+B shipped; demo GIF deferred; Phase 5 / observability SaaS out |
-| Git HEAD (reconciled) | `2d5554e` (parent `fc7403a`) |
-| Last updated | 2026-08-30T21:46:00Z |
+| Phase / Stage | REQ-0013 / GATE-0013 + GATE-0002 **closed** at commit-ready |
+| Gate | GATE-0013 RESOLVED; GATE-0012 RESOLVED; GATE-0002 RESOLVED |
+| Status | Sentry tunnel + Langfuse shipped; Vercel firewall + prod env confirmed by human |
+| Git HEAD (reconciled) | pending this commit (parent `9075d59`) |
+| Last updated | 2026-08-30T22:10:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- REQ-0010 + Phase 3 UX through `3075c34`
-- **REQ-0011** through `fc7403a` — async expand/dialog harvest
-- **REQ-0012** — README mermaid + CONTRIBUTING + issue templates; mocked Firecrawl tests; env `RATE_LIMIT_*`; crawl error UX (`crawl-errors.ts`)
+- **REQ-0012** at `2d5554e` / `9075d59`
+- **REQ-0013** — `@sentry/nextjs` + `/api/monitoring`; Langfuse server chat traces; verify-deep PASS WITH WARNINGS; local build PASS
+- **GATE-0002** — Vercel Bot Protection Challenge + AI Bots Deny + Sentry/Langfuse env (human)
 
-## Known deferred / open
+## Deferred
 
-- README **demo GIF** (optional later; mermaid + screenshots ship instead)
-- **Phase 5** Crawl4AI / VPS
-- Langfuse / PostHog / Sentry SDKs
-- GATE-0002 Vercel firewall Human-Action may still be pending
+- PostHog; README demo GIF; Phase 5 Crawl4AI
 
 ## Next exact action
 
-**Human:** Optional demo GIF later; otherwise Phase 5 planning or GATE-0002 firewall. Push when ready.
-
-## Resume command
-
-```text
-/agile-v-core
-Load .agile-v/STATE.md. REQ-0012 closed. Next: optional GIF, Phase 5 Crawl4AI, or GATE-0002 firewall.
-```
+Push when ready; optional prod smoke (Network → `/api/monitoring`; Langfuse UI after one chat).

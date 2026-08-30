@@ -45,3 +45,30 @@ source: user approved GATE-0012 defaults + implement-deep + verify-deep + commit
 approver: user
 date: 2026-08-30
 ```
+
+---
+
+## GATE-0013 — Sentry tunnel + Langfuse tracing approval
+
+```text
+APPROVED: GATE-0013
+resume_token: C1-GATE1-OBS-2026-08-30
+scope: Sentry tunnel + quiet CI/filters + Langfuse chat tracing
+posthog: out
+source: user confirmed plan implement GATE-0013
+approver: user
+date: 2026-08-30
+```
+
+---
+
+## GATE-0002 — Vercel firewall / Bot Protection (Human-Action)
+
+```text
+APPROVED: GATE-0002
+resume_token: C1-GATE2-FIREWALL
+scope: Vercel Bot Protection Challenge + AI Bots Deny + production env (Sentry/Langfuse)
+source: user confirmed dashboard settings complete during GATE-0013 commit-ready
+approver: user
+date: 2026-08-30
+```

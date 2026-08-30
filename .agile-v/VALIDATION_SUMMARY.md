@@ -51,8 +51,12 @@
 | VAL-0047 | lint | `npm run lint` | **PASS** | 2026-08-30 | REQ-0012 OSS + scale commit-ready |
 | VAL-0048 | unit tests | `npm run test` | **PASS** | 2026-08-30 | 93 passed, 1 skipped (+ firecrawl-client mock, parse-positive-int, crawl-errors) |
 | VAL-0049 | build | `npm run build` | **PASS** | 2026-08-30 | Next 16.3.3 Turbopack; GATE-0012 commit-ready |
+| VAL-0050 | lint | `npm run lint` | **PASS** | 2026-08-30 | GATE-0013 Sentry + Langfuse |
+| VAL-0051 | unit tests | `npm run test` | **PASS** | 2026-08-30 | 98 passed, 1 skipped (+ sentry-filters, langfuse truncate) |
+| VAL-0052 | build | `npm run build` | **PASS** | 2026-08-30 | `/api/monitoring` rewrite present in routes-manifest |
+| VAL-0053 | verify-deep | implementation-verifier + local lint/test/build | **PASS WITH WARNINGS** | 2026-08-30 | No live UI smoke; commit-ready YES |
 
-`eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
+`eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 
 Expected build warnings (keep):
 - Custom Cache-Control on `/_next/static` (intentional)

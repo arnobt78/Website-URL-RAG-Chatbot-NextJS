@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 // Production guardrails: security headers + immutable hashed Next static assets.
 // Mirrors vercel.json so bots cannot freely re-download /_next/static forever.
+import { withSentryConfig } from "@sentry/nextjs";
 
 function buildContentSecurityPolicy() {
   const isDev = process.env.NODE_ENV !== "production";
@@ -34,6 +35,7 @@ const securityHeaders = [
   },
 ];
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   // Keep wasm-heavy tokenizers external so Turbopack does not drop tiktoken_bg.wasm.
   serverExternalPackages: [
@@ -45,6 +47,8 @@ const nextConfig = {
     "@langchain/classic",
     "langchain",
     "llamaindex",
+    "langfuse",
+    "langfuse-core",
   ],
   async headers() {
     return [
@@ -66,4 +70,24 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN?.trim();
+const sentryOrg = process.env.SENTRY_ORG?.trim();
+const sentryProject = process.env.SENTRY_PROJECT?.trim();
+const canUploadSourceMaps = Boolean(sentryAuthToken && sentryOrg && sentryProject);
+
+export default withSentryConfig(nextConfig, {
+  org: sentryOrg,
+  project: sentryProject,
+  authToken: canUploadSourceMaps ? sentryAuthToken : undefined,
+  tunnelRoute: "/api/monitoring",
+  silent: true,
+  telemetry: false,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+    disable: !canUploadSourceMaps,
+  },
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
+});

@@ -35,8 +35,15 @@ Until this appears in `APPROVALS.md` (or explicit chat approval matching the tok
 
 | Field | Value |
 |-------|-------|
-| Status | NOT STARTED (firewall Human-Action may still be open) |
-| Prereqs | VALIDATION_SUMMARY, EVAL_RESULTS (or WAIVE), Red Team verification |
+| Status | **RESOLVED** (firewall Human-Action reported done 2026-08-30) |
+| Prereqs | VALIDATION_SUMMARY; Bot Protection Challenge + AI Bots Deny on Vercel |
+
+### Evidence Summary
+```
+Scope: Vercel Bot Protection Challenge + AI Bots Deny; production env incl. Sentry/Langfuse
+Source: human confirmed dashboard configuration complete
+Log: 2026-08-30T22:10:00Z | ORCHESTRATOR | GATE_RESOLVED | firewall Human-Action
+```
 
 ---
 
@@ -79,4 +86,23 @@ Findings: PASS — mermaid README (no GIF); CONTRIBUTING + issue templates; mock
   env RATE_LIMIT_*; crawl-errors UX; lint/test/build green
 Defaults locked: GIF deferred; observability SaaS out; Phase 5 deferred
 Log: 2026-08-30T21:46:00Z | ORCHESTRATOR | GATE_RESOLVED | REQ-0012 verified
+```
+
+---
+
+## GATE-0013 — Human Gate 1 (Sentry tunnel + Langfuse)
+
+| Field | Value |
+|-------|-------|
+| Stage | Observability after REQ-0012 |
+| Status | **RESOLVED** (implementation verified; commit pending) |
+| Cycle | C1 |
+| Resume token | `C1-GATE1-OBS-2026-08-30` |
+| Approval | `.agile-v/APPROVALS.md` |
+
+### Evidence Summary
+```
+Scope: REQ-0013 Sentry tunnel + quiet CI/filters + Langfuse chat tracing | PostHog out
+Findings: PASS — tunnelRoute /api/monitoring in routes-manifest; lint/test/build green
+Log: 2026-08-30T22:05:00Z | ORCHESTRATOR | GATE_RESOLVED | REQ-0013 implemented
 ```

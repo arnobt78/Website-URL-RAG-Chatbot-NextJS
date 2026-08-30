@@ -581,13 +581,15 @@ import { mapChatHttpError } from "@/lib/chat-errors";
 
 1. Push to GitHub and import repo in [Vercel](https://vercel.com)
 2. Set **Node.js 24.x** in project settings
-3. Add all environment variables from [Environment Variables](#environment-variables)
+3. Add environment variables from [Environment Variables](#environment-variables) and [`.env.example`](./.env.example) (include optional `SENTRY_*` / `LANGFUSE_*` for production observability)
 4. Deploy — preview URL works like production
 
-**Recommended Vercel settings:**
+**Production Vercel (this project — configured):**
 
-- Bot Protection: Challenge (see `docs/VERCEL_PRODUCTION_GUARDRAILS.md`)
-- Environment: Production + Preview both get Upstash + LLM keys
+- Bot Protection: **Challenge** + AI Bots Deny (GATE-0002 Human-Action done)
+- Sentry + Langfuse env vars set on the Vercel project (empty locally → SDKs stay disabled)
+- Client Sentry uses same-origin tunnel **`/api/monitoring`** (works with ad blockers)
+- See `docs/VERCEL_PRODUCTION_GUARDRAILS.md` and `docs/Redis_Sentry_PostHog_INTEGRATION_GUIDE.md`
 
 Live demo: [scraper-rag-chatbot.vercel.app](https://scraper-rag-chatbot.vercel.app)
 
@@ -600,6 +602,9 @@ Live demo: [scraper-rag-chatbot.vercel.app](https://scraper-rag-chatbot.vercel.a
 | Chat returns 503 "No AI provider configured" | No LLM keys in env                   | Add at least one key from `.env.example`           |
 | 502 "All AI providers unavailable"           | All keys invalid or rate-limited     | Verify keys; try another provider                  |
 | 429 Too many requests                        | Rate limit or provider quota         | Wait 1 min; add more provider keys                 |
+| Sentry events missing with ad blocker        | Client must use tunnel `/api/monitoring` | Set `NEXT_PUBLIC_SENTRY_DSN`; empty DSN disables Sentry |
+| No Langfuse traces                           | Missing keys or flush timing         | Set `LANGFUSE_*`; traces are server-only on chat-stream |
+| Verbose Sentry upload logs on Vercel         | Plugin verbosity                     | `silent: true` + `telemetry: false` already set in `next.config.mjs` |
 | Old messages after clearing browser data     | History is in **Redis**, not browser | Expected — new session cookie = new history bucket |
 | Ingest slow on first visit                   | Scraping + embedding large page      | Normal; subsequent visits skip re-index            |
 | `upstash()` / QStash Llama errors            | Hosted LLMs discontinued             | Do not use — this repo uses `src/lib/ai/` instead  |

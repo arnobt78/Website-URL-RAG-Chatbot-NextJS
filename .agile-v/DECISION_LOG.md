@@ -93,3 +93,12 @@ Append-only. Do not rewrite prior entries.
 | Decision | Ship Waves A+B: README mermaid (no GIF), CONTRIBUTING + issue templates, mocked Firecrawl tests, env `RATE_LIMIT_*`, centralized crawl error UX. GATE-0012 resolved. Demo GIF optional later; Phase 5 / SaaS observability still out. |
 | Rationale | User approved GATE-0012 defaults; verify-deep PASS WITH WARNINGS then local build PASS; user deferred GIF discussion. |
 | Linked | REQ-0012, GATE-0012, VAL-0047…0049 |
+
+## DEC-0011 — REQ-0013 Sentry tunnel + Langfuse (no PostHog)
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-30T22:05:00Z |
+| Agent | Cursor |
+| Decision | Ship `@sentry/nextjs` with `tunnelRoute: /api/monitoring`, quiet `silent`/`telemetry`, shared filters; Langfuse v3 server-only on chat-stream with flush via `after()`. PostHog out. Crawl workflow not traced by default. |
+| Rationale | User GATE-0013 plan; ad-blocker bypass; avoid CSP connect-src expansion; classic Langfuse SDK fits non–AI SDK RAG stream. |
+| Linked | REQ-0013, GATE-0013, VAL-0050…0052 |
