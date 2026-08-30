@@ -44,8 +44,12 @@ def test_rejects_dns_to_private():
             assert_safe_public_url("https://evil.example/")
 
 
-def test_allows_public_example():
-    assert_safe_public_url("https://example.com/")
+def test_allows_public_hostname_when_dns_is_public():
+    fake = [
+        (2, 1, 6, "", ("93.184.216.34", 0)),
+    ]
+    with patch("app.url_safety.socket.getaddrinfo", return_value=fake):
+        assert_safe_public_url("https://example.com/")
 
 
 @pytest.mark.asyncio

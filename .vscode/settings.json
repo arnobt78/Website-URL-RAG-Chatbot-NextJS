@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/services/agentic-pipeline/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/services/agentic-pipeline"
+  ],
+  "python.analysis.diagnosticMode": "workspace"
+}

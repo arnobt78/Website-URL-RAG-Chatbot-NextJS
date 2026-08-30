@@ -1,3 +1,5 @@
+"""Environment settings and fail-closed API token policy for the agentic pipeline."""
+
 from __future__ import annotations
 
 import os
@@ -6,12 +8,13 @@ from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Tokens that must never be used in production / secure mode
+# Compared via token.strip().lower() — keep entries lowercase only
 INSECURE_TOKEN_PLACEHOLDERS = frozenset(
     {
         "",
         "change-me",
         "change-me-to-a-long-random-token",
-        "YOUR_TOKEN",
+        "your_token",
         "your-token",
         "secret",
         "password",

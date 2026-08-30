@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **GATE-0015 RESOLVED** — Crawl4AI optional + agentic debate; local E2E smoke PASS; Firecrawl default |
-| Git baseline   | `5906b5e` / was `29f2996` |
+| Current Status | **GATE-0015 RESOLVED** — Crawl4AI optional + agentic debate; local E2E smoke PASS; Firecrawl default; agentic auth fail-closed + extractor SSRF |
+| Git baseline   | `4a4d78f` (agentic security harden) / was `5906b5e` |
 
 ---
 
@@ -32,7 +32,7 @@ Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl 
 
 Crawl: `buildCrawlPlan` → provider scrape via `scrape-provider` (Firecrawl default or `CRAWL_PROVIDER=crawl4ai`) with **async expand/dialog harvest** + optional Firecrawl **/interact** (skipped for crawl4ai) → Redis live progress → index; each job has a **`runId`**. Separate experimental agentic pipeline: `services/agentic-pipeline/` (`/v1/pipeline` + `/v1/debate` with crawl_qa / draft A/B / boss validator; does not replace chat RAG).
 
-Security: SSRF DNS checks (`url-security.ts`), ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
+Security: SSRF DNS checks (`url-security.ts` for Next; agentic `url_safety.py` for extractor); agentic HTTP Bearer fail-closed (`AGENTIC_API_TOKEN` ≥32, `AGENTIC_ALLOW_INSECURE_DEV` escape hatch); ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
 
 Do not invent a parallel RAG/LLM stack without an approved REQ.
 

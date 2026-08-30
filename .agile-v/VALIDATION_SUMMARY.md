@@ -65,6 +65,8 @@
 | VAL-0061 | live agentic API | uvicorn `:8080` `/v1/pipeline` + `/v1/debate` | **PASS** | 2026-08-31 | example.com; debate winner + rounds |
 | VAL-0062 | live Next crawl4ai E2E | `CRAWL_PROVIDER=crawl4ai` + `QSTASH_DEV_PORT=8082` → recrawl → chat | **PASS** | 2026-08-31 | indexed 2/2; chat grounded; note: avoid QStash Dev vs agents on same :8080 |
 | VAL-0063 | verify-deep + commit-ready | lint/test/build + pytest + implementation-verifier | **PASS WITH WARNINGS** | 2026-08-31 | STATE hash drift fixed this commit; Coolify still operator |
+| VAL-0064 | agentic security harden | `pytest -q` in services/agentic-pipeline | **PASS** | 2026-08-31 | 30 passed (auth fail-closed + SSRF + debate/pipeline); commit `4a4d78f` |
+| VAL-0065 | basedpyright settings | `basedpyright app/settings.py` (service venv) | **PASS** | 2026-08-31 | 0 errors; pyrightconfig + `.vscode` interpreter → agentic `.venv` |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 

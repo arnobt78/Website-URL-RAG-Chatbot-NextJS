@@ -3,26 +3,27 @@
 | Field | Value |
 |-------|-------|
 | Cycle | **C1** |
-| Phase / Stage | REQ-0015 / GATE-0015 **closed** at commit-ready |
+| Phase / Stage | REQ-0015 / GATE-0015 closed; agentic security harden follow-up |
 | Gate | GATE-0015 RESOLVED; GATE-0014 RESOLVED |
-| Status | Crawl4AI optional + agentic debate shipped; local E2E smoke PASS; Firecrawl default; Coolify operator pending |
-| Git HEAD (reconciled) | `5906b5e` / includes `29f2996` feat + smoke docs |
-| Last updated | 2026-08-31T01:17:00Z |
+| Status | Agentic fail-closed auth + extractor SSRF shipped (`4a4d78f`+); Firecrawl default; Coolify operator pending |
+| Git HEAD (reconciled) | pending this commit (includes `4a4d78f` harden) |
+| Last updated | 2026-08-31T01:36:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- **REQ-0014** at `97a29f6` / memory `f616d26`
-- **REQ-0015** at `29f2996` / memory `d148d42`; gitignore fix `67d040a`; smoke docs `5906b5e`
-- Live smoke VAL-0060…0062: Crawl4AI Docker, agentic debate, Next crawl4ai→chat
+- **REQ-0014** / **REQ-0015** + local E2E smoke (VAL-0060…0062)
+- **Agentic security harden:** fail-closed Bearer + `AGENTIC_ALLOW_INSECURE_DEV`; `url_safety.py` SSRF; pytest 30 PASS; commit `4a4d78f`
+- Post-verify polish: placeholder case match, offline DNS allow-test, `pyrightconfig` + workspace Python interpreter for agentic `.venv`
 
 ## Deferred
 
 - PostHog; README demo GIF; Next.js RAG enrichment via agents
 - Coolify DNS / Vercel crawl4ai switch (operator)
+- Residual SSRF DNS TOCTOU (accepted / out of harden plan)
 
 ## Next exact action
 
-Operator: Coolify DNS/secrets for crawl4ai + agents (see `docs/SELF_HOST_CRAWL.md` checklist + private Hetzner guide). Push when ready.
+Operator: Coolify DNS/secrets (strong `AGENTIC_API_TOKEN`, no `AGENTIC_ALLOW_INSECURE_DEV` on public hosts). Push when ready.
