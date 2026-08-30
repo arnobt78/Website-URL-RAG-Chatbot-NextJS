@@ -126,3 +126,22 @@ Findings: PASS — docker/crawl4ai; crawl4ai-client + scrape-provider; SELF_HOST
   services/agentic-pipeline 7-stage + MCP; VAL-0054..0057
 Log: 2026-08-31 | ORCHESTRATOR | GATE_RESOLVED | REQ-0014 verified
 ```
+
+---
+
+## GATE-0015 — Multi-agent debate + crawl QA
+
+| Field | Value |
+|-------|-------|
+| Stage | After REQ-0014 |
+| Status | **RESOLVED** |
+| Cycle | C1 |
+| Resume token | `C1-GATE1-DEBATE-2026-08-31` |
+| Approval | user plan GATE-0014 close-out + GATE-0015 |
+
+### Evidence Summary
+```
+Scope: REQ-0015 crawl_qa + draft A/B + boss loop; /v1/debate; MCP; gen-local-service-env.sh
+Findings: PASS — 13 pytest; Next RAG unchanged; .env gitignored
+Log: 2026-08-31 | ORCHESTRATOR | GATE_RESOLVED | REQ-0015
+```

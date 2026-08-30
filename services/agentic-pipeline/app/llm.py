@@ -17,6 +17,7 @@ async def _chat(
     api_key: str | None,
     model: str,
     messages: list[dict[str, str]],
+    temperature: float = 0.2,
     timeout: float = 60.0,
 ) -> str:
     headers = {"Content-Type": "application/json"}
@@ -26,7 +27,7 @@ async def _chat(
         res = await client.post(
             f"{base_url.rstrip('/')}/chat/completions",
             headers=headers,
-            json={"model": model, "messages": messages, "temperature": 0.2},
+            json={"model": model, "messages": messages, "temperature": temperature},
         )
         if res.status_code >= 400:
             raise LlmError(f"{res.status_code}: {res.text[:200]}")
@@ -37,7 +38,9 @@ async def _chat(
         return content.strip()
 
 
-async def complete(system: str, user: str) -> tuple[str, str]:
+async def complete(
+    system: str, user: str, *, temperature: float = 0.2
+) -> tuple[str, str]:
     """Return (text, provider_label). Raises LlmError if all providers fail."""
     settings = get_settings()
     messages = [
@@ -91,7 +94,13 @@ async def complete(system: str, user: str) -> tuple[str, str]:
 
     for label, base, key, model in chain:
         try:
-            text = await _chat(base_url=base, api_key=key, model=model, messages=messages)
+            text = await _chat(
+                base_url=base,
+                api_key=key,
+                model=model,
+                messages=messages,
+                temperature=temperature,
+            )
             return text, label
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{label}: {exc}")

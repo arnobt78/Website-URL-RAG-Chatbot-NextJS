@@ -60,6 +60,10 @@ Omit `CRAWL_PROVIDER` or set `firecrawl` to keep the SaaS path. Jina single-page
 
 Deploy [`services/agentic-pipeline/`](../services/agentic-pipeline/) with its Dockerfile/compose to e.g. `agents.example.com`. Set `AGENTIC_API_TOKEN`. Optional: point extractors at Crawl4AI or Firecrawl via env. This service does **not** replace Next.js chat.
 
+Local tokens (gitignored): `./scripts/gen-local-service-env.sh`
+
+Debate API: `POST /v1/debate` runs crawl QA + dual drafts + boss validator (see service README).
+
 Do **not** commit real IPs, Coolify UUIDs, or passwords. Keep private VPS runbooks out of git (or gitignored).
 
 ## Expand harvest

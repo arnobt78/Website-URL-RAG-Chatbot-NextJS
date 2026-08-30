@@ -18,10 +18,16 @@ class Settings(BaseSettings):
     openrouter_api_key: str | None = None
     ollama_base_url: str | None = None
     ollama_model: str = "llama3.2"
+    max_debate_rounds: int = 3
 
 
 @lru_cache
 def get_settings() -> Settings:
+    rounds_raw = os.getenv("MAX_DEBATE_ROUNDS", "3").strip()
+    try:
+        max_rounds = max(1, min(8, int(rounds_raw)))
+    except ValueError:
+        max_rounds = 3
     return Settings(
         agentic_api_token=os.getenv("AGENTIC_API_TOKEN", "change-me"),
         crawl4ai_base_url=os.getenv("CRAWL4AI_BASE_URL") or None,
@@ -32,4 +38,5 @@ def get_settings() -> Settings:
         openrouter_api_key=os.getenv("OPENROUTER_API_KEY") or None,
         ollama_base_url=os.getenv("OLLAMA_BASE_URL") or None,
         ollama_model=os.getenv("OLLAMA_MODEL", "llama3.2"),
+        max_debate_rounds=max_rounds,
     )

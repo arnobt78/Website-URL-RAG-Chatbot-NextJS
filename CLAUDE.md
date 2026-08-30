@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **GATE-0014 RESOLVED** — optional Crawl4AI provider + agentic pipeline service; Firecrawl default; GATE-0002 firewall set |
-| Git baseline   | `97a29f6` / was `94abb75` |
+| Current Status | **GATE-0015 RESOLVED** — Crawl4AI optional + agentic debate/boss validator; Firecrawl default |
+| Git baseline   | pending GATE-0015 / was `97a29f6` |
 
 ---
 
@@ -30,7 +30,7 @@ Preserve existing structure under `src/app`, `src/components`, `src/lib`.
 
 Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl workflow or Jina fallback) → `ChatWrapper` (polls `/api/crawl/status`; merges live progress via `mergeLiveCrawlContext` + `crawlProgressDisplay`; 403/429 toasts via `crawlStatusPollFailure`) / `ChatShell` → `POST /api/chat-stream` (site-root namespace + cookie + optional `chatId` → `chatWithFallback()`).
 
-Crawl: `buildCrawlPlan` → provider scrape via `scrape-provider` (Firecrawl default or `CRAWL_PROVIDER=crawl4ai`) with **async expand/dialog harvest** + optional Firecrawl **/interact** (skipped for crawl4ai) → Redis live progress → index; each job has a **`runId`**. Separate experimental agentic pipeline: `services/agentic-pipeline/` (does not replace chat RAG).
+Crawl: `buildCrawlPlan` → provider scrape via `scrape-provider` (Firecrawl default or `CRAWL_PROVIDER=crawl4ai`) with **async expand/dialog harvest** + optional Firecrawl **/interact** (skipped for crawl4ai) → Redis live progress → index; each job has a **`runId`**. Separate experimental agentic pipeline: `services/agentic-pipeline/` (`/v1/pipeline` + `/v1/debate` with crawl_qa / draft A/B / boss validator; does not replace chat RAG).
 
 Security: SSRF DNS checks (`url-security.ts`), ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
 

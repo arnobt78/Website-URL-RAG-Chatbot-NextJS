@@ -60,6 +60,7 @@
 | VAL-0056 | build | `npm run build` | **PASS** | 2026-08-31 | Next 16.3.3; Firecrawl default unchanged |
 | VAL-0057 | agentic pytest | `cd services/agentic-pipeline && pytest -q` | **PASS** | 2026-08-31 | 6 passed (validator + stub pipeline) |
 | VAL-0058 | verify-deep GATE-0014 | lint/test/build + pytest + implementation-verifier | **PASS** | 2026-08-31 | Commit-ready YES for REQ-0014 |
+| VAL-0059 | agentic pytest GATE-0015 | `pytest -q` in services/agentic-pipeline | **PASS** | 2026-08-31 | 13 passed (boss + debate + crawl_qa) |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 

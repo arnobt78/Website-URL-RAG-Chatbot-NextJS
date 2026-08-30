@@ -1,19 +1,17 @@
 # TASKS.md — Prioritized Plan
 
-**Active gate:** GATE-0015 — multi-agent debate (after GATE-0014 commit)  
-Historical: REQ-0004…0010; REQ-0011 → `fc7403a`; REQ-0012; REQ-0013; REQ-0014 Phase 5.
+**Active gate:** none (GATE-0015 RESOLVED)  
+Historical: … REQ-0014 Phase 5; REQ-0015 debate.
 
 ---
 
-## REQ-0014 — DONE (GATE-0014)
+## REQ-0015 — DONE (GATE-0015)
 
 | ID | Task | Status |
 |----|------|--------|
-| TASK-0021 | docker/crawl4ai compose + env example | **DONE** |
-| TASK-0022 | crawl4ai-client + scrape-provider + workflow wiring | **DONE** |
-| TASK-0023 | SELF_HOST_CRAWL.md + mocked tests + docs | **DONE** |
-| TASK-0024 | services/agentic-pipeline FastAPI 7-stage + MCP + notebook | **DONE** |
-| TASK-0025 | VAL lint/test/build + pytest; commit-ready sync | **DONE** |
+| TASK-0026 | gen-local-service-env.sh + gitignored tokens | **DONE** |
+| TASK-0027 | crawl_qa + draft A/B + boss loop + /v1/debate + MCP | **DONE** |
+| TASK-0028 | debate tests + docs + commit-ready | **DONE** |
 
 ---
 
@@ -22,6 +20,5 @@ Historical: REQ-0004…0010; REQ-0011 → `fc7403a`; REQ-0012; REQ-0013; REQ-001
 | Priority | Item |
 |----------|------|
 | Optional | README demo GIF |
-| P1 | GATE-0015 multi-agent debate + crawl_qa + boss validator |
 | Low | `hashLinksFromPage` wiring |
 | Out | PostHog; Next RAG enrichment via agents |

@@ -143,6 +143,16 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ---
 
+### REQ-0015 — Multi-agent debate + crawl QA (boss validator)
+**Priority:** P0  
+**Status:** DONE (GATE-0015)  
+**Description:** Extend agentic service with crawl_qa heuristics, dual draft agents (A/B), boss validator loop (`POST /v1/debate`, MCP `debate_run`/`crawl_qa_run`), local gitignored env generator script. Does not replace Next RAG.  
+**Evidence paths:** `services/agentic-pipeline/app/debate.py`, `stages/crawl_qa.py`, `stages/validator.py` (boss_decide), `scripts/gen-local-service-env.sh`  
+**Acceptance:** Boss prefers grounded draft; revise/reject ungrounded; max rounds respected; pytest PASS.  
+**Linked:** GATE-0015
+
+---
+
 ## Non-goals for C1 (unless approved)
 
 - Reintroducing the previously removed experimental scraper / Groq-only parallel stack without a REQ.

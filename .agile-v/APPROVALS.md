@@ -86,3 +86,16 @@ source: user confirmed plan implement GATE-0014
 approver: user
 date: 2026-08-31
 ```
+
+---
+
+## GATE-0015 — Multi-agent debate approval
+
+```text
+APPROVED: GATE-0015
+resume_token: C1-GATE1-DEBATE-2026-08-31
+scope: crawl_qa + draft A/B + boss validator; local gitignored env tokens
+source: user approved plan GATE-0014 close-out + GATE-0015 multi-agent
+approver: user
+date: 2026-08-31
+```

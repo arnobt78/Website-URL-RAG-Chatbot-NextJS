@@ -116,7 +116,8 @@ flowchart TB
 - ✅ `docker/crawl4ai/docker-compose.yml` (+ `.env.example`)
 - ✅ `src/lib/crawl/crawl4ai-client.ts` + `scrape-provider.ts` facade
 - ✅ `docs/SELF_HOST_CRAWL.md` (Coolify DNS placeholders; no VPS secrets)
-- ✅ `services/agentic-pipeline/` — FastAPI 7-stage + MCP + notebooks (separate from Next RAG)
+- ✅ `services/agentic-pipeline/` — FastAPI 7-stage + MCP + notebooks
+- ✅ GATE-0015 multi-agent debate (`/v1/debate`, crawl_qa, boss validator) + `scripts/gen-local-service-env.sh`
 
 ---
 

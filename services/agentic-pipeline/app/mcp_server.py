@@ -1,4 +1,4 @@
-"""MCP stdio server exposing pipeline stages for Cursor/Claude agents."""
+"""MCP stdio server exposing pipeline + debate tools."""
 
 from __future__ import annotations
 
@@ -6,8 +6,10 @@ import json
 
 from mcp.server.fastmcp import FastMCP
 
-from app.models import PipelineState
+from app.debate import run_debate
+from app.models import PageDoc, PipelineState
 from app.pipeline import STAGE_NAMES, run_pipeline
+from app.stages.crawl_qa import score_crawl_quality
 from app.stages.extractor import run_extractor
 from app.stages.validator import run_validator
 
@@ -22,9 +24,21 @@ async def pipeline_run(url: str, question: str) -> str:
 
 
 @mcp.tool()
+async def debate_run(url: str, question: str) -> str:
+    """Run crawl_qa + dual drafts + boss validator debate until accept or max rounds."""
+    result = await run_debate(url, question)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
 def stage_list() -> str:
-    """List pipeline stage names in order."""
-    return json.dumps({"stages": STAGE_NAMES})
+    """List pipeline stage names and debate agents."""
+    return json.dumps(
+        {
+            "stages": STAGE_NAMES,
+            "debate_agents": ["crawl_qa", "draft_a", "draft_b", "boss_validator"],
+        }
+    )
 
 
 @mcp.tool()
@@ -36,6 +50,13 @@ async def stage_extractor(url: str, question: str = "summarize") -> str:
         {"pages": [{"url": p.url, "chars": len(p.markdown)} for p in state.pages]},
         indent=2,
     )
+
+
+@mcp.tool()
+def crawl_qa_run(markdown: str, url: str = "https://example.com") -> str:
+    """Score crawl/harvest quality heuristics for a markdown page."""
+    qa = score_crawl_quality([PageDoc(url=url, markdown=markdown)])
+    return json.dumps(qa, indent=2)
 
 
 @mcp.tool()
