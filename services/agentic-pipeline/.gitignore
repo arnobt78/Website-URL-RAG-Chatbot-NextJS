@@ -1,6 +1,6 @@
-# Python
-services/agentic-pipeline/.venv/
-services/agentic-pipeline/**/__pycache__/
-services/agentic-pipeline/.pytest_cache/
-services/agentic-pipeline/.env
-docker/crawl4ai/.env
+# Python (paths relative to this directory)
+.venv/
+**/__pycache__/
+.pytest_cache/
+*.pyc
+.env
