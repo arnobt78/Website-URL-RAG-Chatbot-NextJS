@@ -6,7 +6,7 @@
 | Phase / Stage | REQ-0012 / GATE-0012 **RESOLVED** (Phase 4 OSS + scale hardening) |
 | Gate | **GATE-0012 RESOLVED**; GATE-0011 RESOLVED; GATE-0002 firewall may remain open |
 | Status | REQ-0012 DONE — Waves A+B shipped; demo GIF deferred; Phase 5 / observability SaaS out |
-| Git HEAD (reconciled) | pending commit after this sync (parent `fc7403a`) |
+| Git HEAD (reconciled) | `2d5554e` (parent `fc7403a`) |
 | Last updated | 2026-08-30T21:46:00Z |
 | Agent | Cursor |
 
