@@ -6,7 +6,7 @@
 | Phase / Stage | REQ-0014 / GATE-0014 **closed** at commit-ready; GATE-0015 multi-agent next |
 | Gate | GATE-0014 RESOLVED (verify PASS); prior GATE-0013/0012/0002 RESOLVED |
 | Status | Phase 5 Crawl4AI optional provider + separate agentic 7-stage service shipped; Firecrawl remains default |
-| Git HEAD (reconciled) | pending commit-ready (was `94abb75`) |
+| Git HEAD (reconciled) | `97a29f6` / parent `94abb75` |
 | Last updated | 2026-08-31T00:35:00Z |
 | Agent | Cursor |
 
