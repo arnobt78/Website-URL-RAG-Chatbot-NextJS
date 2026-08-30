@@ -75,3 +75,21 @@ Append-only. Do not rewrite prior entries.
 | Decision | Ship async expand/dialog harvest (`expand-harvest.ts`): no click-all closed; form-aware isChrome; read-more + `[role="tab"]`; interact default 8; expand default on. GATE-0011 resolved. Next cycle: Phase 4 OSS + abuse/budget/observability; Phase 5 Crawl4AI later — not more resume-tab special cases. |
 | Rationale | Live Firecrawl matrix + in-app FAQ chat smoke PASS; accepted limits: CSS-only with no control; resume English labels are bonus on `/resume|cv|profile`. |
 | Linked | REQ-0011, GATE-0011, VAL-0043…0046 |
+
+## DEC-0009 — Plan GATE-0012 (OSS + scale); freeze until approval
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-30T21:25:00Z |
+| Agent | Cursor |
+| Decision | After reconcile HEAD=`fc7403a`, open REQ-0012 / GATE-0012 for Phase 4 OSS + scale hardening. Phase 5 Crawl4AI and Langfuse/Sentry out by default. Implementation frozen pending Gate approval. |
+| Rationale | Protocol §4; STATE next action; user `/agile-v-core` plan-first. |
+| Linked | REQ-0012, GATE-0012, TASK-0015…0020 |
+
+## DEC-0010 — REQ-0012 implemented; GIF deferred
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-30T21:46:00Z |
+| Agent | Cursor |
+| Decision | Ship Waves A+B: README mermaid (no GIF), CONTRIBUTING + issue templates, mocked Firecrawl tests, env `RATE_LIMIT_*`, centralized crawl error UX. GATE-0012 resolved. Demo GIF optional later; Phase 5 / SaaS observability still out. |
+| Rationale | User approved GATE-0012 defaults; verify-deep PASS WITH WARNINGS then local build PASS; user deferred GIF discussion. |
+| Linked | REQ-0012, GATE-0012, VAL-0047…0049 |

@@ -30,3 +30,18 @@ source: user directed implement-deep + verify-deep + commit-ready
 approver: user
 date: 2026-08-28
 ```
+
+---
+
+## GATE-0012 — OSS polish + scale hardening approval
+
+```text
+APPROVED: GATE-0012
+resume_token: C1-GATE1-SCALE-2026-08-30
+scope: TASK-0015..0020
+demo_media: mermaid+README (GIF deferred)
+observability_saas: out
+source: user approved GATE-0012 defaults + implement-deep + verify-deep + commit-ready
+approver: user
+date: 2026-08-30
+```

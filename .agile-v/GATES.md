@@ -58,3 +58,25 @@ Findings: PASS — async harvest; live matrix + in-app FAQ chat smoke; form-awar
 Defaults locked: interact budget 8; CRAWL_EXPAND_HIDDEN on; dialog smoke W3C APG
 Log: 2026-08-28T22:50:00Z | ORCHESTRATOR | GATE_RESOLVED | REQ-0011 verified
 ```
+
+---
+
+## GATE-0012 — Human Gate 1 (OSS polish + scale hardening)
+
+| Field | Value |
+|-------|-------|
+| Stage | After REQ-0011; Synthesis complete for REQ-0012 |
+| Status | **RESOLVED** |
+| Cycle | C1 |
+| Resume token | `C1-GATE1-SCALE-2026-08-30` |
+| Plan | `.agile-v/phases/03-oss-scale-hardening/PLAN.md` |
+| Approval | `.agile-v/APPROVALS.md` |
+
+### Evidence Summary
+```
+Scope: REQ-0012 Phase 4 OSS + scale hardening | Traceability: TASK-0015..0020
+Findings: PASS — mermaid README (no GIF); CONTRIBUTING + issue templates; mocked Firecrawl tests;
+  env RATE_LIMIT_*; crawl-errors UX; lint/test/build green
+Defaults locked: GIF deferred; observability SaaS out; Phase 5 deferred
+Log: 2026-08-30T21:46:00Z | ORCHESTRATOR | GATE_RESOLVED | REQ-0012 verified
+```

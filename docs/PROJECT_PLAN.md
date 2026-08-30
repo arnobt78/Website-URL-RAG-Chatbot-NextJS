@@ -101,13 +101,14 @@ flowchart TB
 - ✅ `/api/crawl/status` session cookie + `allowCrawlStatusPoll` rate limit
 - ✅ Index snapshot for revisit (badge/dialog after job TTL expires)
 
-### Phase 4 — OSS / GitHub polish ⏳
+### Phase 4 — OSS / GitHub polish ✅
 
-- ⏳ README demo GIF (URL → crawl → “Who is …?” answered)
-- ⏳ Architecture diagram in README
-- ⏳ Optional: Langfuse, PostHog, Sentry
-- ⏳ Mocked Firecrawl tests; optional CI smoke with `FIRECRAWL_API_KEY` secret
-- ⏳ `CONTRIBUTING.md`, `SECURITY.md`, issue templates
+- ⏳ README demo GIF (URL → crawl → chat) — **deferred** (optional later)
+- ✅ Architecture mermaid diagrams in README
+- ⏳ Optional: Langfuse, PostHog, Sentry — **out of GATE-0012**
+- ✅ Mocked Firecrawl unit tests in default CI (no live key)
+- ✅ `CONTRIBUTING.md`, issue templates (`SECURITY.md` already present)
+- ✅ Env-tunable rate limits + clearer crawl error UX (REQ-0012 Wave B)
 
 ### Phase 5 — Self-hosted Crawl4AI (optional) — not started
 
@@ -121,9 +122,10 @@ flowchart TB
 
 | Item | Priority |
 | ---- | -------- |
-| **Phase 4** — README GIF, architecture diagram, CONTRIBUTING/SECURITY, mocked Firecrawl CI | **High** |
-| Scale — abuse limits, budget caps, clearer crawl errors, observability | High |
+| Optional README demo GIF | Later |
 | Phase 5 VPS / Crawl4AI | Later |
+| Observability SaaS (Langfuse/Sentry) | Later |
+| GATE-0002 Vercel firewall Human-Action | Open |
 | `hashLinksFromPage` wiring | Low |
 
 ---

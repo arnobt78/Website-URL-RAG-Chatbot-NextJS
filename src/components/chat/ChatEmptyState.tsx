@@ -76,6 +76,9 @@ export function ChatEmptyState({ pageContext }: ChatEmptyStateProps) {
       <div className="max-w-lg space-y-2">
         <h3 className="text-xl font-semibold text-white">{title}</h3>
         <p className="text-sm leading-relaxed text-zinc-400">{subtitle}</p>
+        {ingestError && phaseDetail && phaseDetail !== ingestError ? (
+          <p className="text-xs text-zinc-500">{phaseDetail}</p>
+        ) : null}
         {ingestError ? (
           <p className="text-xs text-zinc-500">
             You can still try asking — answers may be limited without full site content.

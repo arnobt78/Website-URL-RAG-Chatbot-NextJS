@@ -6,6 +6,10 @@ import {
   type CrawlJobRecord,
 } from "@/lib/crawl/crawl-job-store";
 import {
+  CRAWL_USER_ERRORS,
+  logCrawlEvent,
+} from "@/lib/crawl/crawl-errors";
+import {
   isFirecrawlConfigured,
   isWorkflowConfigured,
 } from "@/lib/crawl/config";
@@ -46,26 +50,38 @@ export async function startSiteCrawl(args: {
   }
 
   if (!args.skipRateLimit && !(await allowCrawlRequest(args.clientIp))) {
+    logCrawlEvent("crawl_fail", {
+      reason: "rate_limited",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Too many site crawl requests. Please wait an hour and try again.",
+      ingestError: CRAWL_USER_ERRORS.RATE_LIMITED,
     };
   }
 
   if (!isFirecrawlConfigured()) {
+    logCrawlEvent("crawl_fail", {
+      reason: "missing_firecrawl",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Site crawl is not configured. Add FIRECRAWL_API_KEY to enable whole-site indexing.",
+      ingestError: CRAWL_USER_ERRORS.MISSING_FIRECRAWL,
     };
   }
 
   if (!isWorkflowConfigured()) {
+    logCrawlEvent("crawl_fail", {
+      reason: "missing_qstash",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Background crawl is not configured. Add QSTASH_TOKEN to enable whole-site indexing.",
+      ingestError: CRAWL_USER_ERRORS.MISSING_QSTASH,
     };
   }
 
@@ -85,12 +101,23 @@ export async function startSiteCrawl(args: {
 
   if (!triggered) {
     await redis.del(`crawl:job:${args.siteRootKey}`);
+    logCrawlEvent("crawl_fail", {
+      reason: "workflow_trigger",
+      siteRootKey: args.siteRootKey,
+      runId: job.runId,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Could not start site crawl workflow.",
+      ingestError: CRAWL_USER_ERRORS.WORKFLOW_START_FAILED,
     };
   }
+
+  logCrawlEvent("crawl_start", {
+    siteRootKey: args.siteRootKey,
+    runId: job.runId,
+    force: Boolean(args.force),
+  });
 
   return { ok: true, job };
 }

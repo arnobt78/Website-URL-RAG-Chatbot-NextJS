@@ -8,9 +8,10 @@
 [![Upstash](https://img.shields.io/badge/Upstash-Vector%20%2B%20Redis-orange)](https://upstash.com/)
 [![launch with diploi badge](https://diploi.com/launch.svg)](https://diploi.com/launch/arnobt78/ai-rag-chatbot)
 
-A modern, full-stack **Website URL RAG Chatbot** — paste any public website URL, ingest its content into **Upstash Vector**, and chat with grounded answers via a **multi-provider LLM fallback chain** (Gemini, Groq, OpenRouter free models, Hugging Face). Built with **Next.js 16**, **React 19**, and **TypeScript**, with live token streaming and Redis-backed session history.
+A modern, full-stack **Website URL RAG Chatbot** — paste any public website URL, **crawl the whole site** with **Firecrawl** (async expand/harvest for FAQs, tabs, dialogs, and toggles), index into **Upstash Vector**, and chat with grounded answers via a **multi-provider LLM fallback chain** (Gemini, Groq, OpenRouter free models, Hugging Face). Built with **Next.js 16**, **React 19**, and **TypeScript**, with live token streaming and Redis-backed session history. Single-page **Jina Reader** remains a fallback when whole-site crawl is not configured.
 
 - **Live-Demo:** [https://scraper-rag-chatbot.vercel.app/www.wikipedia.org](https://scraper-rag-chatbot.vercel.app/www.wikipedia.org)
+- **Contributing:** [CONTRIBUTING.md](./CONTRIBUTING.md)
 - **Security:** Private reports → [SECURITY.md](./SECURITY.md) · [contact@arnobmahmud.com](mailto:contact@arnobmahmud.com)
 - **Author:** [Arnob Mahmud](https://www.arnobmahmud.com/) | **LinkedIn:** [https://www.linkedin.com/in/arnob-mahmud-05839655/](https://www.linkedin.com/in/arnob-mahmud-05839655/) | **GitHub:** [https://github.com/arnobt78](https://github.com/arnobt78)
 
@@ -45,14 +46,17 @@ A modern, full-stack **Website URL RAG Chatbot** — paste any public website UR
 
 **Website URL RAG Chatbot** is a production-style educational full-stack app that demonstrates how to:
 
-1. **Ingest any public webpage** by visiting `/www.example.com`
-2. **Chunk and embed** content into **Upstash Vector** (built-in `bge-large-en-v1.5` embeddings)
-3. **Retrieve relevant context** semantically when the user asks a question
-4. **Generate answers** via an LLM with **multi-provider automatic fallback**
-5. **Stream tokens** to the browser in real time (ChatGPT-style)
-6. **Persist chat history** per URL + anonymous session in **Upstash Redis**
+1. **Paste any public URL** → visit `/www.example.com`
+2. **Discover and crawl the site** with Firecrawl (map + batched scrape) via Upstash Workflow / QStash
+3. **Expand hidden UI** (FAQ accordions, tabs, dialogs, details, read-more) with deterministic harvest scripts before embedding
+4. **Chunk and embed** into **Upstash Vector** (built-in `bge-large-en-v1.5` embeddings)
+5. **Retrieve relevant context** semantically when the user asks a question
+6. **Generate answers** via an LLM with **multi-provider automatic fallback**
+7. **Stream tokens** to the browser in real time and **persist chat history** in Redis
 
-The original Upstash-hosted Llama models (`upstash()` + QStash) were **discontinued in late 2025**. This repo now uses external free-tier LLM providers while keeping the same RAG ingestion flow via `@upstash/rag-chat`.
+If Firecrawl / QStash are not configured, the app falls back to **Jina Reader** single-page ingest so chat still works.
+
+The original Upstash-hosted Llama models (`upstash()` + QStash LLM) were **discontinued in late 2025**. This repo uses external free-tier LLM providers while keeping RAG via `@upstash/rag-chat`.
 
 ---
 
@@ -64,7 +68,9 @@ The original Upstash-hosted Llama models (`upstash()` + QStash) were **discontin
 | Catch-all dynamic routing                       | `src/app/[...url]/page.tsx`                           |
 | RAG (Retrieval-Augmented Generation)            | `src/lib/rag-chat.ts`, `@upstash/rag-chat`            |
 | Vector databases & semantic search              | Upstash Vector + `ragChat.context.add()`              |
-| SPA / JS-heavy page ingestion                   | `src/lib/fetch-page-content.ts` (Jina Reader)       |
+| Whole-site crawl (Firecrawl + Workflow)         | `src/lib/crawl/`, `/api/crawl/*`                      |
+| Hidden-content expand harvest                   | `src/lib/crawl/expand-harvest.ts`                     |
+| SPA / JS-heavy page fallback                    | `src/lib/fetch-page-content.ts` (Jina Reader)         |
 | Multi-provider LLM fallback                     | `src/lib/ai/`                                         |
 | Streaming HTTP responses                        | `src/app/api/chat-stream/route.ts`, `ChatWrapper.tsx` |
 | Session sidebar (localStorage CRUD)             | `src/components/chat/ChatSidebar.tsx`                 |
@@ -100,7 +106,9 @@ A **Large Language Model** generates human-like text. This project supports seve
 
 ## Features
 
-- **SPA-aware ingestion** — Jina Reader extracts readable text from JavaScript-heavy sites before embedding
+- **Whole-site crawl** — Firecrawl map + batched scrape via Upstash Workflow; live progress + re-crawl
+- **Hidden-content harvest** — async expand for FAQs, tabs, dialogs, `<details>`, read-more (`CRAWL_EXPAND_HIDDEN`)
+- **SPA-aware fallback** — Jina Reader when whole-site crawl is off or unavailable
 - **Upstash Vector RAG** — built-in embeddings (`bge-large-en-v1.5`), no separate embedding API key
 - **Multi-provider LLM fallback** — Gemini → Groq → OpenRouter (`:free`) → Hugging Face → OpenAI (optional)
 - **Live token streaming** — character-by-character assistant replies
@@ -108,7 +116,7 @@ A **Large Language Model** generates human-like text. This project supports seve
 - **Session sidebar** — localStorage chat list (all sites / this site), new / rename / delete; multi-chat via `?chat=` UUID
 - **Prompt chips** — suggested questions above the composer when the thread is empty
 - **Chat history** — Redis-backed messages scoped by URL + cookie (+ optional `chatId`); delete via `DELETE /api/chat-history`
-- **Rate limiting** — Redis per-IP soft limit on `/api/chat-stream` and ingest throttling on first visit
+- **Rate limiting** — Redis per-IP soft limits on chat, ingest, and crawl (env-tunable)
 - **SSRF protection** — DNS-validated URLs; private/reserved IPs blocked on server; redirect re-validation on HTML fallback
 - **Session binding** — HttpOnly cookie + URL-scoped namespace (no client-supplied session ID)
 - **Landing navigation UX** — live path preview, phase-based overlay + Sonner toasts
@@ -124,37 +132,51 @@ A **Large Language Model** generates human-like text. This project supports seve
 
 ## Architecture & Data Flow
 
+Primary path (whole-site crawl configured):
+
+```mermaid
+flowchart LR
+  User --> Landing[HomePage]
+  Landing --> Proxy[proxy_ts]
+  Proxy --> Page[url_page_SSR]
+  Page --> StartCrawl[startSiteCrawl]
+  StartCrawl --> Workflow["/api/crawl/workflow"]
+  Workflow --> Firecrawl[Firecrawl_map_scrape_harvest]
+  Workflow --> Redis[(Upstash_Redis_progress)]
+  Workflow --> Vector[(Upstash_Vector_embed)]
+  User --> ChatAPI["/api/chat-stream"]
+  ChatAPI --> Fallback[ai_fallback]
+  Fallback --> Vector
+  Fallback --> User
+```
+
+Sequence (crawl + chat):
+
 ```mermaid
 sequenceDiagram
   participant User
-  participant Landing as HomePage
   participant Page as url_page_SSR
-  participant Proxy as proxy_ts
-  participant Jina as Jina_Reader
+  participant WF as crawl_workflow
+  participant FC as Firecrawl
   participant Vector as Upstash_Vector
   participant Redis as Upstash_Redis
   participant API as chat_stream
-  participant Fallback as ai_fallback
 
-  User->>Landing: Enter URL on /
-  Landing->>Page: Navigate /www.example.com
-  Proxy->>Page: x-session-id cookie
-  Page->>Redis: sismember indexed-urls jina-v1 key
-  alt Not indexed
-    Page->>Jina: fetchPageContentAsText
-    Jina-->>Page: markdown text
-    Page->>Vector: ragChat.context.add text
-    Page->>Redis: sadd indexed-urls
-  end
-  Page->>Redis: history.getMessages
-  Page->>User: ChatWrapper UI
+  User->>Page: GET /www.example.com
+  Page->>WF: trigger site crawl runId
+  WF->>FC: map + scrape + expand harvest
+  FC-->>WF: markdown pages
+  WF->>Vector: batched embed
+  WF->>Redis: live progress status
+  Page->>User: ChatWrapper polls status
 
   User->>API: POST message
-  API->>Fallback: chatWithFallback streaming
-  Fallback->>Vector: semantic retrieval
-  Fallback->>User: text/plain stream
-  Fallback->>Redis: persist history
+  API->>Vector: semantic retrieval
+  API->>User: text/plain stream
+  API->>Redis: persist history
 ```
+
+Fallback when Firecrawl/QStash are missing: SSR uses **Jina Reader** single-page ingest (see older single-page flow in `src/lib/fetch-page-content.ts`).
 
 ---
 
@@ -167,6 +189,7 @@ sequenceDiagram
 | Toasts        | Sonner                               | Error/success notifications          |
 | Animation     | Framer Motion                        | Landing page reveals                 |
 | RAG SDK       | `@upstash/rag-chat` 2.x              | Ingest, history, chat orchestration  |
+| Crawl         | Firecrawl + Upstash Workflow/QStash  | Whole-site map/scrape + expand harvest |
 | Vector DB     | `@upstash/vector`                    | Embeddings + similarity search       |
 | Cache/History | `@upstash/redis`                     | Chat history, rate limits, dedup set |
 | Validation    | Zod                                  | Request body validation on API       |
@@ -309,6 +332,31 @@ Copy [`.env.example`](./.env.example) to `.env` locally (or set vars in Vercel D
 
 Create a Vector index with an **integrated embedding model** (e.g. `bge-large-en-v1.5`) so you do not need a separate embedding API key.
 
+### Whole-site crawl (recommended)
+
+| Variable | Required | Notes |
+| -------- | -------- | ----- |
+| `FIRECRAWL_API_KEY` | For whole-site | [firecrawl.dev](https://www.firecrawl.dev/) |
+| `QSTASH_TOKEN` (+ signing keys) | For whole-site | [Upstash QStash](https://console.upstash.com/qstash) |
+| `APP_BASE_URL` | Local/prod URL | Workflow callback base (e.g. `http://localhost:3000`) |
+| `CRAWL_MAX_PAGES` | No (default 100) | Cap discovered pages |
+| `CRAWL_EXPAND_HIDDEN` | No (default on) | FAQ/tabs/dialogs/details harvest |
+| `CRAWL_INTERACT_ENABLED` | No (default on) | Firecrawl `/interact` fallback |
+| `CRAWL_INTERACT_MAX_PAGES` | No (default 8) | Prefer-interact page budget |
+| `CRAWL_MAX_ACTIONS_PER_PAGE` | No (default 8) | Actions per scrape |
+
+Without Firecrawl/QStash, the app uses **Jina** single-page ingest (`JINA_API_KEY` optional but recommended).
+
+### Rate limits (optional — defaults match production soft caps)
+
+| Variable | Default | Meaning |
+| -------- | ------- | ------- |
+| `RATE_LIMIT_CHAT_MAX` | 30 | Chat requests / IP / minute |
+| `RATE_LIMIT_INGEST_MAX_PER_IP` | 10 | First-visit ingest / IP / minute |
+| `RATE_LIMIT_INGEST_MAX_GLOBAL` | 100 | Global ingest / minute |
+| `RATE_LIMIT_CRAWL_MAX_PER_HOUR` | 3 | Site crawl starts / IP / hour |
+| `RATE_LIMIT_CRAWL_STATUS_MAX` | 120 | Status polls / IP / minute |
+
 ### Required for chat (at least ONE LLM key)
 
 The app tries providers in order until one succeeds. Configure as many as you want for resilience:
@@ -321,11 +369,12 @@ The app tries providers in order until one succeeds. Configure as many as you wa
 | `HUGGINGFACE_API_KEY` | HF Inference Router | Limited free         | [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)          |
 | `OPENAI_API_KEY`      | OpenAI              | Paid                 | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) _(optional)_ |
 
-### Optional / legacy
+### Optional
 
 | Variable       | Notes                                                                                                                                    |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `QSTASH_TOKEN` | **Not needed for chat anymore.** Upstash discontinued hosted LLMs via QStash (Oct 2025). Keep only if you use QStash for other features. |
+| `JINA_API_KEY` | Single-page fallback reader when whole-site crawl is not used                                                                            |
+| `QSTASH_DEV`   | Local only — auto-starts QStash dev server; do not set on Vercel                                                                         |
 
 ### Example `.env`
 
@@ -335,6 +384,15 @@ UPSTASH_REDIS_REST_URL="https://xxxx.upstash.io"
 UPSTASH_REDIS_REST_TOKEN="AX..."
 UPSTASH_VECTOR_REST_URL="https://xxxx-vector.upstash.io"
 UPSTASH_VECTOR_REST_TOKEN="AX..."
+
+# Whole-site crawl (recommended)
+FIRECRAWL_API_KEY="fc-..."
+QSTASH_TOKEN="..."
+QSTASH_CURRENT_SIGNING_KEY="..."
+QSTASH_NEXT_SIGNING_KEY="..."
+APP_BASE_URL="http://localhost:3000"
+CRAWL_EXPAND_HIDDEN=true
+CRAWL_INTERACT_MAX_PAGES=8
 
 # LLM — at least one (all four recommended for fallback)
 GEMINI_API_KEY="AI..."
@@ -488,10 +546,14 @@ Next.js 16 **proxy** (replaces middleware):
 
 ### Rate limits (`src/lib/rate-limit.ts`)
 
-| Route / action          | Limit                          |
-| ----------------------- | ------------------------------ |
-| `POST /api/chat-stream` | 30 requests / IP / 60s         |
-| First-page ingest       | 10 / IP / min + 100 global/min |
+Defaults (override with `RATE_LIMIT_*` — see Environment Variables):
+
+| Route / action            | Limit                          |
+| ------------------------- | ------------------------------ |
+| `POST /api/chat-stream`   | 30 requests / IP / 60s         |
+| First-page ingest         | 10 / IP / min + 100 global/min  |
+| Site crawl / re-crawl     | 3 starts / IP / hour           |
+| `GET /api/crawl/status`   | 120 polls / IP / min           |
 
 ---
 

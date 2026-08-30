@@ -1,6 +1,7 @@
 import { serve } from "@upstash/workflow/nextjs";
 
 import { getCrawlInteractMaxPages, getCrawlMaxPages } from "@/lib/crawl/config";
+import { CRAWL_USER_ERRORS } from "@/lib/crawl/crawl-errors";
 import { getCrawlJob, updateCrawlJob, markCrawlJobFailed } from "@/lib/crawl/crawl-job-store";
 import { saveIndexSnapshot } from "@/lib/crawl/index-snapshot";
 import { firecrawlMapSite, type CrawledPage } from "@/lib/crawl/firecrawl-client";
@@ -119,7 +120,8 @@ export const { POST } = serve<CrawlWorkflowPayload>(
           payload.siteRootKey,
           {
             status: "failed",
-            error: "No pages could be indexed from this site.",
+            error: CRAWL_USER_ERRORS.NO_PAGES_INDEXED,
+            phaseDetail: CRAWL_USER_ERRORS.NO_PAGES_INDEXED,
             indexed: 0,
             failed: indexResult.failed + scrapeFailed,
           },

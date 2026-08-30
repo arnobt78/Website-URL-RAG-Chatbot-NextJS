@@ -3,42 +3,35 @@
 | Field | Value |
 |-------|-------|
 | Cycle | **C1** |
-| Phase / Stage | Stage 2 — REQ-0011 hidden-content crawl **DONE** |
-| Gate | **GATE-0011 RESOLVED**; GATE-0002 firewall Human-Action may remain open |
-| Status | Async expand/dialog harvest shipped + verified; FAQ/dialog/tabs/read-more live matrix + in-app chat smoke PASS |
-| Git HEAD (pre this commit) | `f4f8c04` (+ uncommitted harvest polish: form-aware isChrome, read-more host, role=tab, widened matrix) |
-| Last updated | 2026-08-28T22:50:00Z |
+| Phase / Stage | REQ-0012 / GATE-0012 **RESOLVED** (Phase 4 OSS + scale hardening) |
+| Gate | **GATE-0012 RESOLVED**; GATE-0011 RESOLVED; GATE-0002 firewall may remain open |
+| Status | REQ-0012 DONE — Waves A+B shipped; demo GIF deferred; Phase 5 / observability SaaS out |
+| Git HEAD (reconciled) | pending commit after this sync (parent `fc7403a`) |
+| Last updated | 2026-08-30T21:46:00Z |
 | Agent | Cursor |
 
 ---
 
 ## Completed (verified)
 
-- REQ-0010 + Phase 3 UX through `3075c34` (progress offsets, batched embed, runId, force re-crawl)
-- **REQ-0011** — `expand-harvest.ts` async harvest; recipes; interact budget 8; `CRAWL_EXPAND_HIDDEN` default on
-- Live Firecrawl matrix: FAQ Radix, APG dialog/alert/disclosure/tabs, Bootstrap collapse, W3Schools read-more, resume `#` / recipe tabs, plan priority
-- In-app re-crawl + chat: pricing, work permit/Bangladesh, Slack/Teams grounded from FAQ answers
+- REQ-0010 + Phase 3 UX through `3075c34`
+- **REQ-0011** through `fc7403a` — async expand/dialog harvest
+- **REQ-0012** — README mermaid + CONTRIBUTING + issue templates; mocked Firecrawl tests; env `RATE_LIMIT_*`; crawl error UX (`crawl-errors.ts`)
 
-## Accepted limitations
+## Known deferred / open
 
-- Pure CSS-hidden text with **no** control is not crawlable
-- Resume path recipe uses English Experience/Education/Skills labels as a bonus; generic `[role="tab"]` harvest is global
-- Portfolio `?tab=` alone may not auto-select; crawl still clicks tab controls
-
-## Known deferred (next cycle — not REQ-0011)
-
-- **Phase 4** — OSS/README polish, mocked Firecrawl CI, CONTRIBUTING/SECURITY
-- **Scale toward 8.5–9** — abuse limits, budget caps, clearer crawl errors, observability
-- **Phase 5** — Crawl4AI / VPS (optional)
+- README **demo GIF** (optional later; mermaid + screenshots ship instead)
+- **Phase 5** Crawl4AI / VPS
+- Langfuse / PostHog / Sentry SDKs
 - GATE-0002 Vercel firewall Human-Action may still be pending
 
 ## Next exact action
 
-**After commit:** Start Phase 4 OSS polish, then abuse/budget/observability; optional Phase 5 Crawl4AI. Do **not** add more resume-tab special cases.
+**Human:** Optional demo GIF later; otherwise Phase 5 planning or GATE-0002 firewall. Push when ready.
 
 ## Resume command
 
 ```text
 /agile-v-core
-Load .agile-v/STATE.md. REQ-0011 closed. Next: Phase 4 OSS + scale hardening (not Crawl4AI unless asked).
+Load .agile-v/STATE.md. REQ-0012 closed. Next: optional GIF, Phase 5 Crawl4AI, or GATE-0002 firewall.
 ```

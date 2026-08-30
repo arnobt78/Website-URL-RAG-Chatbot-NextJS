@@ -1,4 +1,5 @@
 import { getCrawlJob } from "@/lib/crawl/crawl-job-store";
+import { CRAWL_USER_ERRORS } from "@/lib/crawl/crawl-errors";
 import { isValidSiteRootKey } from "@/lib/crawl/site-root";
 import { allowCrawlStatusPoll } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
   const ip = clientIpFromRequest(request);
   if (!(await allowCrawlStatusPoll(ip))) {
     return NextResponse.json(
-      { error: "Too many crawl status requests. Please wait and try again." },
+      { error: CRAWL_USER_ERRORS.STATUS_RATE_LIMITED },
       { status: 429 }
     );
   }

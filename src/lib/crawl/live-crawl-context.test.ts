@@ -72,4 +72,18 @@ describe("mergeLiveCrawlContext", () => {
     expect(merged.crawledPageCount).toBe(7);
     expect(merged.discoveredPageCount).toBe(10);
   });
+
+  it("surfaces job error as ingestError and phaseDetail on failure", () => {
+    const merged = mergeLiveCrawlContext(
+      { ...baseContext, crawlStatus: "running" },
+      {
+        ...liveZeros,
+        status: "failed",
+        error: "No pages could be indexed from this site. Try re-crawl or a different URL.",
+      }
+    );
+    expect(merged.crawlStatus).toBe("failed");
+    expect(merged.ingestError).toContain("No pages could be indexed");
+    expect(merged.phaseDetail).toContain("No pages could be indexed");
+  });
 });

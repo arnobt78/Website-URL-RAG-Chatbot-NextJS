@@ -101,9 +101,25 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ---
 
+## OSS polish + scale hardening
+
+### REQ-0012 — Phase 4 OSS polish + crawl/chat scale hardening
+**Priority:** P0  
+**Status:** DONE (GATE-0012 resolved)  
+**Description:** Prepare the repo for public GitHub use and harden demo-scale abuse/cost UX: accurate README + architecture mermaid for whole-site crawl + expand harvest; CONTRIBUTING + issue templates; mocked Firecrawl tests in CI; env-tunable rate limits; clearer crawl error and progress messaging. Demo GIF deferred. Phase 5 Crawl4AI and observability SaaS out.  
+**Evidence paths:** `README.md`, `CONTRIBUTING.md`, `.github/ISSUE_TEMPLATE/`, `src/lib/rate-limit.ts`, `src/lib/parse-positive-int.ts`, `src/lib/crawl/crawl-errors.ts`, `src/lib/crawl/firecrawl-client.test.ts`, `.env.example`, `.agile-v/phases/03-oss-scale-hardening/PLAN.md`  
+**Acceptance:**
+1. README/CONTRIBUTING match shipped crawl+RAG architecture; default CI green without live Firecrawl key. **PASS**
+2. Rate limits configurable via env; over-limit paths show actionable user-facing errors. **PASS**
+3. `lint` + `test` + `build` PASS. **PASS**
+**Linked:** TASK-0015…0020 (done), GATE-0012, RISK-0005, RISK-0011, RISK-0013, RISK-0014
+
+---
+
 ## Non-goals for C1 (unless approved)
 
 - Reintroducing the previously removed experimental scraper / Groq-only parallel stack without a REQ.
 - Reading or committing real `.env` values.
 - Unrelated refactors of UI libraries (NextUI/Shadcn) unless required by an approved REQ.
-- Phase 5 VPS / Crawl4AI self-host (deferred; not part of GATE-0011).
+- Phase 5 VPS / Crawl4AI self-host (deferred; not part of GATE-0012).
+- README demo GIF (deferred; mermaid + screenshots instead).

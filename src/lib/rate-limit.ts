@@ -1,15 +1,14 @@
+import { parsePositiveInt } from "@/lib/parse-positive-int";
 import { redis } from "@/lib/redis";
 
 /** Soft chat rate limit: max requests per IP per window. Immediate 429 — no sleep/delay. */
 const CHAT_WINDOW_SECONDS = 60;
-const CHAT_MAX_REQUESTS = 30;
+const CHAT_MAX_REQUESTS = parsePositiveInt(process.env.RATE_LIMIT_CHAT_MAX, 30);
 
 /** Ingest rate limit: max first-visit index operations per IP per window. */
 const INGEST_WINDOW_SECONDS = 60;
-const INGEST_MAX_PER_IP = 10;
-
-/** Global ingest cap across all IPs per window. */
-const INGEST_MAX_GLOBAL = 100;
+const INGEST_MAX_PER_IP = parsePositiveInt(process.env.RATE_LIMIT_INGEST_MAX_PER_IP, 10);
+const INGEST_MAX_GLOBAL = parsePositiveInt(process.env.RATE_LIMIT_INGEST_MAX_GLOBAL, 100);
 
 async function incrementWithExpiry(key: string, windowSeconds: number): Promise<number> {
   const count = await redis.incr(key);
@@ -30,7 +29,7 @@ export async function allowChatRequest(ip: string): Promise<boolean> {
 
 /** Global crawl cap: max whole-site crawl jobs per IP per hour. */
 const CRAWL_WINDOW_SECONDS = 60 * 60;
-const CRAWL_MAX_PER_IP = 3;
+const CRAWL_MAX_PER_IP = parsePositiveInt(process.env.RATE_LIMIT_CRAWL_MAX_PER_HOUR, 3);
 
 /**
  * Rate limiter for whole-site crawl workflow triggers.
@@ -42,7 +41,7 @@ export async function allowCrawlRequest(ip: string): Promise<boolean> {
 
 /** Crawl progress poll cap — supports ~3s polling with headroom. */
 const CRAWL_STATUS_WINDOW_SECONDS = 60;
-const CRAWL_STATUS_MAX_PER_IP = 120;
+const CRAWL_STATUS_MAX_PER_IP = parsePositiveInt(process.env.RATE_LIMIT_CRAWL_STATUS_MAX, 120);
 
 export async function allowCrawlStatusPoll(ip: string): Promise<boolean> {
   const count = await incrementWithExpiry(

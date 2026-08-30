@@ -1,28 +1,41 @@
 # TASKS.md — Prioritized Plan
 
-**Active gate:** GATE-0011 — **RESOLVED** (REQ-0011 complete)  
-**Next:** Phase 4 OSS polish → scale hardening; Phase 5 Crawl4AI deferred
-
-Historical C1 Waves 1–3 (REQ-0004…0010) executed under GATE-0001; REQ-0011 under GATE-0011.
+**Active gate:** GATE-0012 — **RESOLVED** (REQ-0012 DONE)  
+Historical: REQ-0004…0010 (GATE-0001); REQ-0011 (GATE-0011) → `fc7403a`.
 
 ---
 
-## REQ-0011 waves — DONE
+## REQ-0011 — DONE
+
+| ID | Status |
+|----|--------|
+| TASK-0011…0014 | **DONE** |
+
+---
+
+## Wave A — Phase 4 OSS polish — DONE
 
 | ID | Task | Status |
 |----|------|--------|
-| TASK-0011 | Deterministic expand+harvest for Radix/single accordion | **DONE** — `expand-harvest.ts` |
-| TASK-0012 | General expand: details, collapsible, Read more / Show more; `[role="tab"]` | **DONE** |
-| TASK-0013 | Dialog/modal harvest; `INTERACT_PROMPT`; interact budget 8; prioritize preferInteract | **DONE** |
-| TASK-0014 | Live matrix + portfolio FAQ chat smoke; VAL + docs sync | **DONE** |
+| TASK-0015 | README whole-site crawl + harvest; architecture mermaid; env table | **DONE** |
+| TASK-0016 | CONTRIBUTING.md + GitHub issue templates | **DONE** |
+| TASK-0017 | Mocked Firecrawl client unit tests (default CI) | **DONE** |
+
+## Wave B — Scale hardening — DONE
+
+| ID | Task | Status |
+|----|------|--------|
+| TASK-0018 | Env-configurable rate limits; `.env.example` | **DONE** |
+| TASK-0019 | Clearer crawl/recrawl/status error + phaseDetail | **DONE** |
+| TASK-0020 | VAL + sync STATE/CLAUDE/PROJECT_PLAN | **DONE** (this commit) |
 
 ---
 
-## Next backlog (not this commit)
+## Deferred (not GATE-0012)
 
 | Priority | Item |
 |----------|------|
-| P1 | Phase 4 — README GIF, architecture diagram, CONTRIBUTING/SECURITY, mocked Firecrawl tests |
-| P1 | Scale — abuse limits, budget caps, clearer crawl progress/errors, observability |
-| P2 | Phase 5 — Crawl4AI / VPS (optional) |
+| Optional | README demo GIF (user deferred) |
+| P2 | Phase 5 — Crawl4AI / VPS |
 | Low | `hashLinksFromPage` wiring |
+| Later | Langfuse / PostHog / Sentry |

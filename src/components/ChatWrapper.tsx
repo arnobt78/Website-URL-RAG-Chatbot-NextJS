@@ -148,6 +148,7 @@ export const ChatWrapper = ({
           indexedPages?: string[];
           currentPath?: string;
           phaseDetail?: string;
+          error?: string;
         };
 
         setLiveCrawl({
@@ -159,6 +160,7 @@ export const ChatWrapper = ({
           indexedPages: data.indexedPages ?? [],
           currentPath: data.currentPath,
           phaseDetail: data.phaseDetail,
+          error: data.error,
         });
 
         if (data.status === "completed" || data.status === "failed") {

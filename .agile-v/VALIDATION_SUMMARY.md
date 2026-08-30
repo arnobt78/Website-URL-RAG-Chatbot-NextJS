@@ -48,6 +48,9 @@
 | VAL-0044 | unit tests | `npm run test` | **PASS** | 2026-08-28 | 82 passed, 1 skipped (+ expand-harvest form/tab/read-more asserts) |
 | VAL-0045 | build | `npm run build` | **PASS** | 2026-08-28 | REQ-0011 commit-ready |
 | VAL-0046 | live matrix + chat | `scripts/e2e-hidden-content-matrix.ts` + local re-crawl/chat | **PASS** | 2026-08-28 | FAQ 673→10k+; dialog/alert/disclosure/bootstrap/read-more/APG tabs/resume; chat pricing/permit/Slack |
+| VAL-0047 | lint | `npm run lint` | **PASS** | 2026-08-30 | REQ-0012 OSS + scale commit-ready |
+| VAL-0048 | unit tests | `npm run test` | **PASS** | 2026-08-30 | 93 passed, 1 skipped (+ firecrawl-client mock, parse-positive-int, crawl-errors) |
+| VAL-0049 | build | `npm run build` | **PASS** | 2026-08-30 | Next 16.3.3 Turbopack; GATE-0012 commit-ready |
 
 `eval_gate_status`: **NOT_STARTED** (production smoke pending deploy + Human-Action firewall).
 

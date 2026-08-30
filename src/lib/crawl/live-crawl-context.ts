@@ -1,3 +1,4 @@
+import { resolveCrawlFailureMessage } from "@/lib/crawl/crawl-errors";
 import { crawlProgressDisplay, type CrawlJobPhase } from "@/lib/crawl/types";
 import type { ChatPageContext } from "@/types/chat";
 
@@ -10,6 +11,8 @@ export type LiveCrawlPoll = {
   indexedPages: string[];
   currentPath?: string;
   phaseDetail?: string;
+  /** Job-level failure message from `/api/crawl/status`. */
+  error?: string;
 };
 
 export type MergeLiveCrawlOptions = {
@@ -60,6 +63,11 @@ export function mergeLiveCrawlContext(
     live.discovered
   );
 
+  const failureMessage =
+    crawlStatus === "failed"
+      ? resolveCrawlFailureMessage(live.error ?? base.ingestError)
+      : undefined;
+
   return {
     ...base,
     crawlStatus,
@@ -69,6 +77,7 @@ export function mergeLiveCrawlContext(
     recentPages: mergeStringList(live.recentPages, base.recentPages, preferLive),
     indexedPages: mergeStringList(live.indexedPages, base.indexedPages, preferLive),
     currentPath: live.currentPath ?? base.currentPath,
-    phaseDetail: live.phaseDetail ?? base.phaseDetail,
+    phaseDetail: live.phaseDetail ?? failureMessage ?? base.phaseDetail,
+    ingestError: failureMessage ?? (crawlStatus === "failed" ? base.ingestError : undefined),
   };
 }

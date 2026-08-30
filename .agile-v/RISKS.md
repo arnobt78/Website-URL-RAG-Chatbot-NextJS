@@ -12,5 +12,7 @@
 | RISK-0008 | Low | Open | **Stale Next 14.2.5 / deps**; security advisories possible. | Audit after baseline green | REQ-0006 |
 | RISK-0009 | Info | Noted | Prior experimental code (scraper/Groq/etc.) was intentionally removed via `git reset --hard` + `git clean`. Do not resurrect without REQ. | Preserve baseline | DEC-0001 |
 | RISK-0010 | High | Mitigated | **Hidden UI content missing from RAG** — FAQ answers / dialogs / toggles not indexed when collapsed (Radix single accordion confirmed on arnobmahmud.com). | REQ-0011 async harvest shipped + live matrix/chat smoke | REQ-0011 |
-| RISK-0011 | Medium | Accepted | **Expand/interact cost** — more actions + higher interact budget burns Firecrawl credits and lengthens crawl. | Cap targets; prioritize preferInteract; default interact 8; Phase 4+ budget caps later | REQ-0011 |
+| RISK-0011 | Medium | Accepted | **Expand/interact cost** — more actions + higher interact budget burns Firecrawl credits and lengthens crawl. | Cap targets; prioritize preferInteract; default interact 8; **env rate limits + clearer errors (REQ-0012)** | REQ-0011, REQ-0012 |
 | RISK-0012 | Medium | Mitigated | **False clicks** — expand scripts may open language/cookie/chat chrome or navigate. | Exclude menus/haspopup; form submits only inside `<form>`; smoke test | REQ-0011 |
+| RISK-0013 | Medium | Mitigated | **OSS docs drift / missing CONTRIBUTING** — README lagged whole-site crawl + harvest. | REQ-0012 Wave A shipped (README mermaid, CONTRIBUTING, templates) | REQ-0012 |
+| RISK-0014 | Medium | Mitigated | **Hard-coded rate limits** — cannot tune per deploy; opaque abuse UX. | REQ-0012 Wave B: `RATE_LIMIT_*` + `crawl-errors.ts` | REQ-0012, RISK-0005 |

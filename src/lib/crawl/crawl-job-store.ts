@@ -135,11 +135,13 @@ export async function markCrawlJobFailed(
   error: string,
   expectedRunId?: string
 ): Promise<void> {
+  const message = error.slice(0, 500);
   await updateCrawlJob(
     siteRootKey,
     {
       status: "failed",
-      error: error.slice(0, 500),
+      error: message,
+      phaseDetail: message,
     },
     { expectedRunId }
   );

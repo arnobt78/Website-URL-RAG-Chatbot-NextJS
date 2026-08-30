@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **REQ-0011 DONE** — async expand/dialog harvest verified; next: Phase 4 OSS + scale hardening (Phase 5 Crawl4AI later) |
-| Git baseline   | `f4f8c04` / `origin/main` (+ harvest polish commit)                                                                                                        |
+| Current Status | **GATE-0012 RESOLVED** — REQ-0012 OSS + scale hardening done; GIF deferred; Phase 5 later |
+| Git baseline   | pending commit (parent `fc7403a` / `origin/main`) |
 
 ---
 

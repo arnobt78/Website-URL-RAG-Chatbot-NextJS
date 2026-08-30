@@ -2,6 +2,10 @@ import "server-only";
 
 import { runWithRagChatFallback } from "@/lib/ai/fallback-rag-chat";
 import { deleteCrawlJob } from "@/lib/crawl/crawl-job-store";
+import {
+  CRAWL_USER_ERRORS,
+  logCrawlEvent,
+} from "@/lib/crawl/crawl-errors";
 import { deleteIndexSnapshot } from "@/lib/crawl/index-snapshot";
 import { startSiteCrawl, type SiteCrawlStatus } from "@/lib/crawl/site-crawl";
 import type { CrawlJobRecord } from "@/lib/crawl/crawl-job-store";
@@ -41,31 +45,47 @@ export async function recrawlSite(args: {
   | { ok: false; ingestError: string; crawlStatus: SiteCrawlStatus }
 > {
   if (!(await allowCrawlRequest(args.clientIp))) {
+    logCrawlEvent("recrawl_fail", {
+      reason: "rate_limited",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Too many site crawl requests. Please wait an hour and try again.",
+      ingestError: CRAWL_USER_ERRORS.RATE_LIMITED,
     };
   }
 
   if (!isFirecrawlConfigured()) {
+    logCrawlEvent("recrawl_fail", {
+      reason: "missing_firecrawl",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Site crawl is not configured. Add FIRECRAWL_API_KEY to enable whole-site indexing.",
+      ingestError: CRAWL_USER_ERRORS.MISSING_FIRECRAWL,
     };
   }
 
   if (!isWorkflowConfigured()) {
+    logCrawlEvent("recrawl_fail", {
+      reason: "missing_qstash",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: "Background crawl is not configured. Add QSTASH_TOKEN to enable whole-site indexing.",
+      ingestError: CRAWL_USER_ERRORS.MISSING_QSTASH,
     };
   }
 
   const invalidated = await invalidateSiteIndex(args.siteRootKey, args.namespace);
   if (!invalidated.ok) {
+    logCrawlEvent("recrawl_fail", {
+      reason: "invalidate",
+      siteRootKey: args.siteRootKey,
+    });
     return {
       ok: false,
       crawlStatus: "failed",

@@ -13,6 +13,10 @@ import {
 import { pathFromSourceUrl, crawlProgressDisplay } from "@/lib/crawl/types";
 import { fetchPageContentAsText } from "@/lib/fetch-page-content";
 import { indexRedisKey } from "@/lib/ingest-constants";
+import {
+  CRAWL_USER_ERRORS,
+  resolveCrawlFailureMessage,
+} from "@/lib/crawl/crawl-errors";
 import { allowIngestRequest } from "@/lib/rate-limit";
 import { redis } from "@/lib/redis";
 import type { CrawlJobPhase } from "@/lib/crawl/types";
@@ -56,6 +60,7 @@ function jobProgressFields(job: CrawlJobRecord | null): Pick<
   | "indexedPages"
   | "currentPath"
   | "phaseDetail"
+  | "ingestError"
 > {
   if (!job) {
     return { crawlStatus: "idle" };
@@ -67,6 +72,8 @@ function jobProgressFields(job: CrawlJobRecord | null): Pick<
     job.indexed,
     job.discovered
   );
+  const failedMessage =
+    phase === "failed" ? resolveCrawlFailureMessage(job.error) : undefined;
   return {
     crawlStatus: crawlStatusFromJob(job),
     crawlJobPhase: phase,
@@ -75,7 +82,8 @@ function jobProgressFields(job: CrawlJobRecord | null): Pick<
     recentPages: job.recentPages,
     indexedPages: job.indexedPages,
     currentPath: job.currentPath,
-    phaseDetail: job.phaseDetail,
+    phaseDetail: job.phaseDetail ?? failedMessage,
+    ingestError: failedMessage,
   };
 }
 
@@ -179,7 +187,7 @@ export async function loadChatPageData({
       return {
         initialMessages,
         indexed: false,
-        ingestError: "Too many indexing requests. Please wait a minute and try again.",
+        ingestError: CRAWL_USER_ERRORS.INDEXING_RATE_LIMITED,
         siteRootKey,
         crawlStatus: "idle",
       };
