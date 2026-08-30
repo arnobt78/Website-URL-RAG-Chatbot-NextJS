@@ -10,7 +10,7 @@ import {
   logCrawlEvent,
 } from "@/lib/crawl/crawl-errors";
 import {
-  isFirecrawlConfigured,
+  isSiteCrawlBackendConfigured,
   isWorkflowConfigured,
 } from "@/lib/crawl/config";
 import { siteOriginHttpsUrl } from "@/lib/crawl/site-root";
@@ -61,15 +61,15 @@ export async function startSiteCrawl(args: {
     };
   }
 
-  if (!isFirecrawlConfigured()) {
+  if (!isSiteCrawlBackendConfigured()) {
     logCrawlEvent("crawl_fail", {
-      reason: "missing_firecrawl",
+      reason: "missing_crawl_backend",
       siteRootKey: args.siteRootKey,
     });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: CRAWL_USER_ERRORS.MISSING_FIRECRAWL,
+      ingestError: CRAWL_USER_ERRORS.MISSING_SITE_CRAWL,
     };
   }
 

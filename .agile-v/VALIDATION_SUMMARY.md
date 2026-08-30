@@ -55,6 +55,11 @@
 | VAL-0051 | unit tests | `npm run test` | **PASS** | 2026-08-30 | 98 passed, 1 skipped (+ sentry-filters, langfuse truncate) |
 | VAL-0052 | build | `npm run build` | **PASS** | 2026-08-30 | `/api/monitoring` rewrite present in routes-manifest |
 | VAL-0053 | verify-deep | implementation-verifier + local lint/test/build | **PASS WITH WARNINGS** | 2026-08-30 | No live UI smoke; commit-ready YES |
+| VAL-0054 | lint | `npm run lint` | **PASS** | 2026-08-31 | GATE-0014 Crawl4AI + scrape facade |
+| VAL-0055 | unit tests | `npm run test` | **PASS** | 2026-08-31 | 103 passed, 1 skipped (+ crawl4ai-client mocks) |
+| VAL-0056 | build | `npm run build` | **PASS** | 2026-08-31 | Next 16.3.3; Firecrawl default unchanged |
+| VAL-0057 | agentic pytest | `cd services/agentic-pipeline && pytest -q` | **PASS** | 2026-08-31 | 6 passed (validator + stub pipeline) |
+| VAL-0058 | verify-deep GATE-0014 | lint/test/build + pytest + implementation-verifier | **PASS** | 2026-08-31 | Commit-ready YES for REQ-0014 |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 

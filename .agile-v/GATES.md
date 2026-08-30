@@ -106,3 +106,23 @@ Scope: REQ-0013 Sentry tunnel + quiet CI/filters + Langfuse chat tracing | PostH
 Findings: PASS — tunnelRoute /api/monitoring in routes-manifest; lint/test/build green
 Log: 2026-08-30T22:05:00Z | ORCHESTRATOR | GATE_RESOLVED | REQ-0013 implemented
 ```
+
+---
+
+## GATE-0014 — Human Gate 1 (Phase 5 Crawl4AI + agentic)
+
+| Field | Value |
+|-------|-------|
+| Stage | After REQ-0013; Phase 5 plan |
+| Status | **RESOLVED** (lint/test/build + pytest PASS; commit-ready) |
+| Cycle | C1 |
+| Resume token | `C1-GATE1-PHASE5-2026-08-31` |
+| Approval | `.agile-v/APPROVALS.md` |
+
+### Evidence Summary
+```
+Scope: REQ-0014 Wave A Crawl4AI + Wave B agentic pipeline | default crawl: firecrawl
+Findings: PASS — docker/crawl4ai; crawl4ai-client + scrape-provider; SELF_HOST_CRAWL.md;
+  services/agentic-pipeline 7-stage + MCP; VAL-0054..0057
+Log: 2026-08-31 | ORCHESTRATOR | GATE_RESOLVED | REQ-0014 verified
+```

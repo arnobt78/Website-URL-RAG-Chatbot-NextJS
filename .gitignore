@@ -29,6 +29,12 @@ yarn-error.log*
 .env*.local
 .env
 
+# Python local (agentic pipeline / tools)
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+*.pyc
+
 # vercel
 .vercel
 
@@ -38,3 +44,6 @@ next-env.d.ts
 
 # local agent skill copies (installed via `npx skills add`)
 .agents/
+
+# docs
+docs/HETZNER_VPS_MIGRATION_GUIDE.md

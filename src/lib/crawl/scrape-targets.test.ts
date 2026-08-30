@@ -11,6 +11,8 @@ vi.mock("@/lib/crawl/config", () => ({
   getCrawlInteractEnabled: () => true,
   getCrawlInteractMaxPages: () => 8,
   getCrawlMaxActionsPerPage: () => 8,
+  getCrawlProvider: () => "firecrawl",
+  isCrawl4aiConfigured: () => false,
 }));
 
 vi.mock("@/lib/crawl/firecrawl-client", () => ({

@@ -10,12 +10,12 @@ import { updateCrawlJob } from "@/lib/crawl/crawl-job-store";
 import {
   firecrawlInteract,
   firecrawlScrapeForInteract,
-  firecrawlScrapeUrl,
   MIN_SCRAPE_CHARS,
   type CrawledPage,
   type FirecrawlAction,
 } from "@/lib/crawl/firecrawl-client";
 import { prioritizeInteractionTargets } from "@/lib/crawl/interaction-recipes";
+import { scrapeUrl, isCrawl4aiBackendActive } from "@/lib/crawl/scrape-provider";
 import { pathFromSourceUrl } from "@/lib/crawl/types";
 
 function capActions(actions: FirecrawlAction[] | undefined, max: number): FirecrawlAction[] {
@@ -51,7 +51,7 @@ async function scrapeTarget(
     const hasHarvestActions = actions.some(
       (a) => a.type === "executeJavascript" && a.script.includes("rag-crawl-harvest")
     );
-    const { page } = await firecrawlScrapeUrl(target.url, {
+    const { page } = await scrapeUrl(target.url, {
       actions: actions.length ? actions : undefined,
       waitFor: 2000,
       formats: ["markdown", "links"],
@@ -72,7 +72,9 @@ async function scrapeTarget(
       result = { ...result, variantKey: target.variantKey };
     }
 
+    // Firecrawl /interact only — Crawl4AI uses js_code on scrape instead
     const needsInteract =
+      !isCrawl4aiBackendActive() &&
       getCrawlInteractEnabled() &&
       interactBudget.remaining > 0 &&
       (target.preferInteract || !result || result.markdown.length < MIN_SCRAPE_CHARS);

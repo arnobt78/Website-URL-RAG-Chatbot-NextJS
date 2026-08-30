@@ -336,7 +336,9 @@ Create a Vector index with an **integrated embedding model** (e.g. `bge-large-en
 
 | Variable | Required | Notes |
 | -------- | -------- | ----- |
-| `FIRECRAWL_API_KEY` | For whole-site | [firecrawl.dev](https://www.firecrawl.dev/) |
+| `FIRECRAWL_API_KEY` | For whole-site (default) | [firecrawl.dev](https://www.firecrawl.dev/) |
+| `CRAWL_PROVIDER` | No (default `firecrawl`) | `firecrawl` \| `crawl4ai` \| `jina-single` |
+| `CRAWL4AI_BASE_URL` / `CRAWL4AI_API_TOKEN` | If `crawl4ai` | See [`docs/SELF_HOST_CRAWL.md`](docs/SELF_HOST_CRAWL.md) |
 | `QSTASH_TOKEN` (+ signing keys) | For whole-site | [Upstash QStash](https://console.upstash.com/qstash) |
 | `APP_BASE_URL` | Local/prod URL | Workflow callback base (e.g. `http://localhost:3000`) |
 | `CRAWL_MAX_PAGES` | No (default 100) | Cap discovered pages |
@@ -345,7 +347,7 @@ Create a Vector index with an **integrated embedding model** (e.g. `bge-large-en
 | `CRAWL_INTERACT_MAX_PAGES` | No (default 8) | Prefer-interact page budget |
 | `CRAWL_MAX_ACTIONS_PER_PAGE` | No (default 8) | Actions per scrape |
 
-Without Firecrawl/QStash, the app uses **Jina** single-page ingest (`JINA_API_KEY` optional but recommended).
+Without Firecrawl/Crawl4AI + QStash, the app uses **Jina** single-page ingest (`JINA_API_KEY` optional but recommended). Optional self-hosted Crawl4AI: [`docs/SELF_HOST_CRAWL.md`](docs/SELF_HOST_CRAWL.md). Separate agentic experiments: [`services/agentic-pipeline/`](services/agentic-pipeline/).
 
 ### Rate limits (optional — defaults match production soft caps)
 

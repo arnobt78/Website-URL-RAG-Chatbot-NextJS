@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **GATE-0013 + GATE-0002 RESOLVED** — Sentry tunnel + Langfuse; Vercel firewall/env set |
-| Git baseline   | `94abb75` / `origin/main` |
+| Current Status | **GATE-0014 RESOLVED** — optional Crawl4AI provider + agentic pipeline service; Firecrawl default; GATE-0002 firewall set |
+| Git baseline   | pending GATE-0014 commit / was `94abb75` |
 
 ---
 
@@ -17,15 +17,10 @@
 | ---------- | ------------------------------------------------------------------------------------------------------ |
 | Frontend   | Next.js 16 App Router, React 19, TypeScript, Tailwind, NextUI, Framer Motion                         |
 | Backend    | Next.js Route Handlers (Node serverless)                                                               |
-| Data       | Upstash Redis + Upstash Vector (via `@upstash/rag-chat`); Firecrawl + QStash Workflow for site crawl; Jina Reader single-page fallback |
-| LLM (code) | Multi-provider fallback in `src/lib/ai/` (Gemini → Groq → OpenRouter → Hugging Face → optional OpenAI) |
-| Streaming  | Native `fetch` + ReadableStream (no AI SDK client)                                                     |
-| Auth       | None (anonymous `sessionId` HttpOnly cookie via `src/proxy.ts`; API binds session to cookie + `canonicalUrl` + optional `chatId`) |
-| Sessions UI | Browser localStorage registry (`chat-sessions-storage.ts`); not multi-tenant DB                      |
-| SEO        | `src/lib/site.ts`, `opengraph-image.tsx`, `robots.ts`                                                        |
-| Deploy     | Vercel; Node **24.x**; security headers + robots; GitHub Actions CI                                   |
+| Data       | Upstash Redis + Upstash Vector (via `@upstash/rag-chat`); Firecrawl (default) or optional Crawl4AI + QStash Workflow; Jina single-page fallback |
+| Deploy     | Vercel; Node **24.x**; optional Coolify for Crawl4AI / agentic-pipeline (see `docs/SELF_HOST_CRAWL.md`) |
 | Observability | Optional Sentry (`@sentry/nextjs`, tunnel `/api/monitoring`) + Langfuse (server chat traces); disabled when DSNs/keys empty |
-| Testing    | lint (`eslint .`) + `vitest run` + `next build`; optional `test:live-ingest`                          |
+| Testing    | lint (`eslint .`) + `vitest run` + `next build`; optional `test:live-ingest`; agentic `pytest` under `services/agentic-pipeline/` |
 
 ---
 
@@ -35,7 +30,7 @@ Preserve existing structure under `src/app`, `src/components`, `src/lib`.
 
 Core flow: `proxy.ts` → `[...url]/page.tsx` (`loadChatPageData` → Firecrawl workflow or Jina fallback) → `ChatWrapper` (polls `/api/crawl/status`; merges live progress via `mergeLiveCrawlContext` + `crawlProgressDisplay`; 403/429 toasts via `crawlStatusPollFailure`) / `ChatShell` → `POST /api/chat-stream` (site-root namespace + cookie + optional `chatId` → `chatWithFallback()`).
 
-Crawl: `buildCrawlPlan` → batched Firecrawl scrape (`crawledOffset`) + batched embed (`indexedOffset`, batch size 4) with **async expand/dialog harvest** (`expand-harvest.ts`: accordions, details, read-more, `[role="tab"]`, dialogs) + optional **/interact** fallback (`CRAWL_INTERACT_MAX_PAGES` default 8; `CRAWL_EXPAND_HIDDEN` default on) → Redis live progress → index; each job has a **`runId`** so stale workflow steps cannot overwrite a re-crawl. `CrawlProgressPanel` shows phase-aware "Crawling X/Y" or "Embedding X/Y". Index snapshot in Redis (`crawl:index-meta:{siteRootKey}`, 90-day TTL). Re-crawl via `POST /api/crawl/recrawl` (always invalidates + restarts; clears stale counts + `ingestError`).
+Crawl: `buildCrawlPlan` → provider scrape via `scrape-provider` (Firecrawl default or `CRAWL_PROVIDER=crawl4ai`) with **async expand/dialog harvest** + optional Firecrawl **/interact** (skipped for crawl4ai) → Redis live progress → index; each job has a **`runId`**. Separate experimental agentic pipeline: `services/agentic-pipeline/` (does not replace chat RAG).
 
 Security: SSRF DNS checks (`url-security.ts`), ingest/chat/crawl rate limits, CSP headers, session namespace isolation (`INDEX_CONTENT_VERSION`).
 

@@ -10,6 +10,8 @@ export const CRAWL_USER_ERRORS = {
     "Too many crawl status requests. Please wait and try again.",
   MISSING_FIRECRAWL:
     "Site crawl is not configured. Add FIRECRAWL_API_KEY to enable whole-site indexing.",
+  MISSING_SITE_CRAWL:
+    "Site crawl is not configured. Set FIRECRAWL_API_KEY (default) or CRAWL_PROVIDER=crawl4ai with CRAWL4AI_BASE_URL and CRAWL4AI_API_TOKEN.",
   MISSING_QSTASH:
     "Background crawl is not configured. Add QSTASH_TOKEN to enable whole-site indexing.",
   WORKFLOW_START_FAILED:

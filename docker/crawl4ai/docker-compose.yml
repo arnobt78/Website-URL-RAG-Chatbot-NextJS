@@ -1,0 +1,25 @@
+# Crawl4AI self-hosted service (local / Coolify)
+
+services:
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    container_name: crawl4ai
+    ports:
+      - "${CRAWL4AI_HOST_PORT:-11235}:11235"
+    shm_size: 1g
+    environment:
+      # Crawl4AI v0.9+ — auth on by default; set a strong token
+      CRAWL4AI_API_TOKEN: ${CRAWL4AI_API_TOKEN:?set CRAWL4AI_API_TOKEN}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11235/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

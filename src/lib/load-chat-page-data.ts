@@ -2,7 +2,7 @@ import "server-only";
 
 import { runWithRagChatFallback } from "@/lib/ai/fallback-rag-chat";
 import { getCrawlJob, type CrawlJobRecord } from "@/lib/crawl/crawl-job-store";
-import { getCrawlProvider, isFirecrawlConfigured, isWorkflowConfigured } from "@/lib/crawl/config";
+import { getCrawlProvider, isSiteCrawlBackendConfigured, isWorkflowConfigured } from "@/lib/crawl/config";
 import { getIndexSnapshot, saveIndexSnapshot } from "@/lib/crawl/index-snapshot";
 import {
   ACTIVE_CRAWL_STATUSES,
@@ -179,7 +179,9 @@ export async function loadChatPageData({
 
   const provider = getCrawlProvider();
   const useSiteCrawl =
-    provider === "firecrawl" && isFirecrawlConfigured() && isWorkflowConfigured();
+    (provider === "firecrawl" || provider === "crawl4ai") &&
+    isSiteCrawlBackendConfigured() &&
+    isWorkflowConfigured();
 
   if (!useSiteCrawl) {
     const allowed = await allowIngestRequest(clientIp);

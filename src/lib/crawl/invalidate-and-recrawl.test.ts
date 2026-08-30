@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   allowCrawlRequest: vi.fn(),
-  isFirecrawlConfigured: vi.fn(),
+  isSiteCrawlBackendConfigured: vi.fn(),
   isWorkflowConfigured: vi.fn(),
   runWithRagChatFallback: vi.fn(),
   redisSrem: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock("@/lib/rate-limit", () => ({
 }));
 
 vi.mock("@/lib/crawl/config", () => ({
-  isFirecrawlConfigured: mocks.isFirecrawlConfigured,
+  isSiteCrawlBackendConfigured: mocks.isSiteCrawlBackendConfigured,
   isWorkflowConfigured: mocks.isWorkflowConfigured,
 }));
 
@@ -53,7 +53,7 @@ const args = {
 describe("recrawlSite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.isFirecrawlConfigured.mockReturnValue(true);
+    mocks.isSiteCrawlBackendConfigured.mockReturnValue(true);
     mocks.isWorkflowConfigured.mockReturnValue(true);
     mocks.runWithRagChatFallback.mockResolvedValue({
       ok: true,

@@ -4,8 +4,9 @@ import { getCrawlInteractMaxPages, getCrawlMaxPages } from "@/lib/crawl/config";
 import { CRAWL_USER_ERRORS } from "@/lib/crawl/crawl-errors";
 import { getCrawlJob, updateCrawlJob, markCrawlJobFailed } from "@/lib/crawl/crawl-job-store";
 import { saveIndexSnapshot } from "@/lib/crawl/index-snapshot";
-import { firecrawlMapSite, type CrawledPage } from "@/lib/crawl/firecrawl-client";
+import type { CrawledPage } from "@/lib/crawl/firecrawl-client";
 import { indexCrawledPages } from "@/lib/crawl/index-pages";
+import { mapSite } from "@/lib/crawl/scrape-provider";
 import { scrapeCrawlTargets } from "@/lib/crawl/scrape-targets";
 import type { CrawlWorkflowPayload } from "@/lib/crawl/trigger-crawl";
 import { buildCrawlPlan } from "@/lib/crawl/url-expander";
@@ -28,7 +29,7 @@ export const { POST } = serve<CrawlWorkflowPayload>(
     const targets = await context.run("map", async () => {
       let links: string[] = [];
       try {
-        links = await firecrawlMapSite(payload.siteOriginUrl);
+        links = await mapSite(payload.siteOriginUrl);
       } catch {
         links = [payload.siteOriginUrl];
       }

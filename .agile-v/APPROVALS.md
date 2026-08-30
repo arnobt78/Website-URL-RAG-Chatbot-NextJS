@@ -72,3 +72,17 @@ source: user confirmed dashboard settings complete during GATE-0013 commit-ready
 approver: user
 date: 2026-08-30
 ```
+
+---
+
+## GATE-0014 — Phase 5 Crawl4AI + agentic pipeline approval
+
+```text
+APPROVED: GATE-0014
+resume_token: C1-GATE1-PHASE5-2026-08-31
+scope: Wave A Crawl4AI + Wave B agentic pipeline (separate service)
+default_crawl: firecrawl
+source: user confirmed plan implement GATE-0014
+approver: user
+date: 2026-08-31
+```

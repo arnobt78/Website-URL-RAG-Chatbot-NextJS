@@ -1,7 +1,7 @@
 # PROJECT_PLAN — Whole-Site URL RAG Chatbot
 
 **REQ:** REQ-0009…0010 · Phase 3 UX · **REQ-0011 hidden-content harvest (shipped)**  
-**Status:** REQ-0011 verified (FAQ/dialog/tabs/read-more); next Phase 4 OSS + scale hardening; Phase 5 Crawl4AI later  
+**Status:** Phase 5 Crawl4AI + agentic pipeline (REQ-0014 / GATE-0014) in progress; Firecrawl remains default crawl
 **Last updated:** 2026-08-28
 
 ---
@@ -83,8 +83,8 @@ flowchart TB
 - ✅ `src/app/api/crawl/workflow/route.ts` — `@upstash/workflow`
 - ✅ Redis: `crawl:job:{siteRootKey}` (live job, 7-day TTL) + `crawl:index-meta:{siteRootKey}` (durable snapshot, 90-day TTL)
 - ✅ `load-chat-page-data.ts` → start workflow, show crawl progress
-- ✅ `CRAWL_PROVIDER=firecrawl|jina-single` switch
-- ⏳ Crawl4AI provider (Phase 5)
+- ✅ `CRAWL_PROVIDER=firecrawl|crawl4ai|jina-single` switch
+- ✅ Crawl4AI provider (Phase 5 — optional; Firecrawl default)
 
 ### Phase 2 — Multi-page RAG indexing ✅
 
@@ -111,11 +111,12 @@ flowchart TB
 - ✅ Env-tunable rate limits + clearer crawl error UX (REQ-0012 Wave B)
 - ✅ Vercel production env (incl. Sentry/Langfuse) + Bot Protection / AI Bots Deny (GATE-0002 Human-Action) — **configured 2026-08-30**
 
-### Phase 5 — Self-hosted Crawl4AI (optional) — not started
+### Phase 5 — Self-hosted Crawl4AI + agentic pipeline ✅
 
-- ⏳ Docker on Hetzner/Coolify
-- ⏳ `src/lib/crawl/crawl4ai-provider.ts`
-- ⏳ `docs/SELF_HOST_CRAWL.md`
+- ✅ `docker/crawl4ai/docker-compose.yml` (+ `.env.example`)
+- ✅ `src/lib/crawl/crawl4ai-client.ts` + `scrape-provider.ts` facade
+- ✅ `docs/SELF_HOST_CRAWL.md` (Coolify DNS placeholders; no VPS secrets)
+- ✅ `services/agentic-pipeline/` — FastAPI 7-stage + MCP + notebooks (separate from Next RAG)
 
 ---
 
@@ -125,7 +126,7 @@ flowchart TB
 | ---- | -------- |
 | Optional README demo GIF | Later |
 | Observability SaaS extras (PostHog) | Out |
-| Phase 5 VPS / Crawl4AI | Later |
+| Coolify DNS for crawl4ai/agents (operator) | After images land |
 | `hashLinksFromPage` wiring | Low |
 
 ---

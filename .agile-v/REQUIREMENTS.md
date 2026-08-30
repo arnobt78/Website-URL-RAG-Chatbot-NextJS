@@ -131,10 +131,23 @@ All items below are **DRAFT** pending **GATE-0001**.
 
 ---
 
+## Phase 5 — Crawl4AI + agentic pipeline
+
+### REQ-0014 — Crawl4AI provider + separate agentic 7-stage service
+**Priority:** P0  
+**Status:** DONE (GATE-0014 resolved; verify lint/test/build + pytest PASS)  
+**Description:** Optional Crawl4AI Docker provider (`CRAWL_PROVIDER=crawl4ai`) wired into existing Upstash workflow; Firecrawl remains default. Separate Python FastAPI agentic 7-stage + MCP + notebooks under `services/agentic-pipeline/` (does not replace Next RAG/chat). Public Coolify docs without VPS secrets.  
+**Evidence paths:** `docker/crawl4ai/`, `src/lib/crawl/crawl4ai-client.ts`, `src/lib/crawl/scrape-provider.ts`, `docs/SELF_HOST_CRAWL.md`, `services/agentic-pipeline/`  
+**Acceptance:** Wave A/B criteria met (mocked CI; Firecrawl default unchanged). **PASS**  
+**Linked:** GATE-0014
+
+---
+
 ## Non-goals for C1 (unless approved)
 
 - Reintroducing the previously removed experimental scraper / Groq-only parallel stack without a REQ.
 - Reading or committing real `.env` values.
 - Unrelated refactors of UI libraries (NextUI/Shadcn) unless required by an approved REQ.
-- Phase 5 VPS / Crawl4AI self-host (deferred; not part of GATE-0012).
 - README demo GIF (deferred; mermaid + screenshots instead).
+- Replacing Firecrawl as default crawl provider.
+- Replacing `@upstash/rag-chat` with LlamaIndex inside the Next app.

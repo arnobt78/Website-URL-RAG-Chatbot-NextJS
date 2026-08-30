@@ -10,7 +10,7 @@ import { deleteIndexSnapshot } from "@/lib/crawl/index-snapshot";
 import { startSiteCrawl, type SiteCrawlStatus } from "@/lib/crawl/site-crawl";
 import type { CrawlJobRecord } from "@/lib/crawl/crawl-job-store";
 import {
-  isFirecrawlConfigured,
+  isSiteCrawlBackendConfigured,
   isWorkflowConfigured,
 } from "@/lib/crawl/config";
 import { indexRedisKey } from "@/lib/ingest-constants";
@@ -56,15 +56,15 @@ export async function recrawlSite(args: {
     };
   }
 
-  if (!isFirecrawlConfigured()) {
+  if (!isSiteCrawlBackendConfigured()) {
     logCrawlEvent("recrawl_fail", {
-      reason: "missing_firecrawl",
+      reason: "missing_crawl_backend",
       siteRootKey: args.siteRootKey,
     });
     return {
       ok: false,
       crawlStatus: "failed",
-      ingestError: CRAWL_USER_ERRORS.MISSING_FIRECRAWL,
+      ingestError: CRAWL_USER_ERRORS.MISSING_SITE_CRAWL,
     };
   }
 

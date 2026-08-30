@@ -102,3 +102,12 @@ Append-only. Do not rewrite prior entries.
 | Decision | Ship `@sentry/nextjs` with `tunnelRoute: /api/monitoring`, quiet `silent`/`telemetry`, shared filters; Langfuse v3 server-only on chat-stream with flush via `after()`. PostHog out. Crawl workflow not traced by default. |
 | Rationale | User GATE-0013 plan; ad-blocker bypass; avoid CSP connect-src expansion; classic Langfuse SDK fits non–AI SDK RAG stream. |
 | Linked | REQ-0013, GATE-0013, VAL-0050…0052 |
+
+## DEC-0012 — REQ-0014 Phase 5 Crawl4AI + agentic (Firecrawl default)
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-08-31T00:35:00Z |
+| Agent | Cursor |
+| Decision | Ship optional Crawl4AI Docker provider + scrape facade; Firecrawl remains default. Separate FastAPI 7-stage agentic service with MCP/notebooks; does not replace Next RAG. Multi-agent debate deferred to GATE-0015. |
+| Rationale | GATE-0014 plan; reviewable baseline before debate loops; Coolify-ready public docs without VPS secrets. |
+| Linked | REQ-0014, GATE-0014, VAL-0054…0057 |

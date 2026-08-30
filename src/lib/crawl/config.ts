@@ -1,12 +1,13 @@
 import "server-only";
 
-export type CrawlProvider = "firecrawl" | "jina-single";
+export type CrawlProvider = "firecrawl" | "jina-single" | "crawl4ai";
 
 const DEFAULT_MAX_PAGES = 100;
 
 export function getCrawlProvider(): CrawlProvider {
   const raw = process.env.CRAWL_PROVIDER?.trim().toLowerCase();
   if (raw === "jina-single") return "jina-single";
+  if (raw === "crawl4ai") return "crawl4ai";
   return "firecrawl";
 }
 
@@ -20,6 +21,19 @@ export function getCrawlMaxPages(): number {
 
 export function getFirecrawlApiKey(): string | undefined {
   return process.env.FIRECRAWL_API_KEY?.trim() || undefined;
+}
+
+export function getCrawl4aiBaseUrl(): string | undefined {
+  const url = process.env.CRAWL4AI_BASE_URL?.trim();
+  return url ? url.replace(/\/$/, "") : undefined;
+}
+
+export function getCrawl4aiApiToken(): string | undefined {
+  return process.env.CRAWL4AI_API_TOKEN?.trim() || undefined;
+}
+
+export function isCrawl4aiConfigured(): boolean {
+  return Boolean(getCrawl4aiBaseUrl() && getCrawl4aiApiToken());
 }
 
 export function getAppBaseUrl(): string {
@@ -43,6 +57,14 @@ export function getQstashBaseUrl(): string | undefined {
 
 export function isFirecrawlConfigured(): boolean {
   return Boolean(getFirecrawlApiKey());
+}
+
+/** Whole-site crawl backend ready (Firecrawl or Crawl4AI). Still needs QStash for workflow. */
+export function isSiteCrawlBackendConfigured(): boolean {
+  const provider = getCrawlProvider();
+  if (provider === "crawl4ai") return isCrawl4aiConfigured();
+  if (provider === "jina-single") return false;
+  return isFirecrawlConfigured();
 }
 
 const DEFAULT_MAX_ACTIONS = 8;
