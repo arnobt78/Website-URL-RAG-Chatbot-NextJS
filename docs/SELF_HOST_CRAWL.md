@@ -41,28 +41,22 @@ QSTASH_TOKEN=...
 APP_BASE_URL=http://localhost:3000
 ```
 
+Local tip: if you also run the agentic service on `:8080`, set `QSTASH_DEV_PORT=8082` (or move agents off 8080). QStash Dev defaults to 8080 and will fail with `address already in use` otherwise.
+
 Omit `CRAWL_PROVIDER` or set `firecrawl` to keep the SaaS path. Jina single-page fallback (`jina-single`) is unchanged.
 
-## Coolify / VPS (placeholders only)
+## Coolify / VPS operator checklist (you)
 
-1. Create a Coolify application from `docker/crawl4ai/docker-compose.yml` (or the same image `unclecode/crawl4ai:latest` with `--shm-size=1g`).
-2. Point DNS, e.g. `crawl4ai.example.com` → your Coolify proxy.
+Public steps only — use your private gitignored Hetzner guide for IPs/passwords; never commit them.
+
+1. Coolify app from [`docker/crawl4ai/docker-compose.yml`](../docker/crawl4ai/docker-compose.yml) (or image `unclecode/crawl4ai:latest`, `--shm-size=1g`).
+2. DNS e.g. `crawl4ai.<your-domain>` → Coolify proxy; TLS on.
 3. Set `CRAWL4AI_API_TOKEN` in Coolify secrets; rotate periodically.
-4. On Vercel (only if production should use Crawl4AI):
+4. Coolify app from [`services/agentic-pipeline/`](../services/agentic-pipeline/) (Dockerfile/compose); DNS e.g. `agents.<your-domain>`; set `AGENTIC_API_TOKEN` (+ optional LLM / Crawl4AI env).
+5. Vercel: keep Firecrawl **or** set `CRAWL_PROVIDER=crawl4ai` + `CRAWL4AI_BASE_URL=https://crawl4ai.<your-domain>` + token — only if production should use self-host crawl.
+6. Smoke: `GET https://crawl4ai…/health`, `POST /md` with bearer; `GET https://agents…/health`, `POST /v1/debate` with bearer.
 
-   ```bash
-   CRAWL_PROVIDER=crawl4ai
-   CRAWL4AI_BASE_URL=https://crawl4ai.example.com
-   CRAWL4AI_API_TOKEN=<same-secret>
-   ```
-
-### Agentic pipeline (separate service)
-
-Deploy [`services/agentic-pipeline/`](../services/agentic-pipeline/) with its Dockerfile/compose to e.g. `agents.example.com`. Set `AGENTIC_API_TOKEN`. Optional: point extractors at Crawl4AI or Firecrawl via env. This service does **not** replace Next.js chat.
-
-Local tokens (gitignored): `./scripts/gen-local-service-env.sh`
-
-Debate API: `POST /v1/debate` runs crawl QA + dual drafts + boss validator (see service README).
+Local tokens (gitignored): `./scripts/gen-local-service-env.sh`. Debate API: `POST /v1/debate` (see service README). This service does **not** replace Next.js chat.
 
 Do **not** commit real IPs, Coolify UUIDs, or passwords. Keep private VPS runbooks out of git (or gitignored).
 

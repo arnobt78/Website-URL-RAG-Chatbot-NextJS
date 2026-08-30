@@ -24,4 +24,4 @@
 
 ## Next exact action
 
-Push when ready; Coolify apps for crawl4ai/agents when desired.
+Operator: Coolify DNS/secrets for crawl4ai + agents (see `docs/SELF_HOST_CRAWL.md` checklist + private Hetzner guide). Push when ready.

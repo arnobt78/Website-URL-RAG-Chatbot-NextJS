@@ -61,6 +61,9 @@
 | VAL-0057 | agentic pytest | `cd services/agentic-pipeline && pytest -q` | **PASS** | 2026-08-31 | 6 passed (validator + stub pipeline) |
 | VAL-0058 | verify-deep GATE-0014 | lint/test/build + pytest + implementation-verifier | **PASS** | 2026-08-31 | Commit-ready YES for REQ-0014 |
 | VAL-0059 | agentic pytest GATE-0015 | `pytest -q` in services/agentic-pipeline | **PASS** | 2026-08-31 | 13 passed (boss + debate + crawl_qa) |
+| VAL-0060 | live Crawl4AI Docker | compose up + `/health` + `/md` | **PASS** | 2026-08-31 | image `unclecode/crawl4ai:latest` healthy; example.com markdown |
+| VAL-0061 | live agentic API | uvicorn `:8080` `/v1/pipeline` + `/v1/debate` | **PASS** | 2026-08-31 | example.com; debate winner + rounds |
+| VAL-0062 | live Next crawl4ai E2E | `CRAWL_PROVIDER=crawl4ai` + `QSTASH_DEV_PORT=8082` → recrawl → chat | **PASS** | 2026-08-31 | indexed 2/2; chat grounded; note: avoid QStash Dev vs agents on same :8080 |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 
