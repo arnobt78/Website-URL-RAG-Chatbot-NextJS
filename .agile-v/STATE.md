@@ -6,7 +6,7 @@
 | Phase / Stage | REQ-0015 / GATE-0015 **closed** at commit-ready |
 | Gate | GATE-0015 RESOLVED; GATE-0014 RESOLVED |
 | Status | Crawl4AI optional + agentic debate (boss validator) shipped; Firecrawl default; Next RAG unchanged |
-| Git HEAD (reconciled) | pending GATE-0015 commit (feat parent `97a29f6`) |
+| Git HEAD (reconciled) | `29f2996` / parent `97a29f6` |
 | Last updated | 2026-08-31T00:45:00Z |
 | Agent | Cursor |
 
