@@ -6,8 +6,8 @@
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
-| Current Status | **GATE-0015 RESOLVED** — Crawl4AI optional + agentic debate/boss validator; Firecrawl default |
-| Git baseline   | `29f2996` / was `97a29f6` |
+| Current Status | **GATE-0015 RESOLVED** — Crawl4AI optional + agentic debate; local E2E smoke PASS; Firecrawl default |
+| Git baseline   | `fc6452a` / was `29f2996` |
 
 ---
 

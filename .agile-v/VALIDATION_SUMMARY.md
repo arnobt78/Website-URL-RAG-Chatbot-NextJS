@@ -64,6 +64,7 @@
 | VAL-0060 | live Crawl4AI Docker | compose up + `/health` + `/md` | **PASS** | 2026-08-31 | image `unclecode/crawl4ai:latest` healthy; example.com markdown |
 | VAL-0061 | live agentic API | uvicorn `:8080` `/v1/pipeline` + `/v1/debate` | **PASS** | 2026-08-31 | example.com; debate winner + rounds |
 | VAL-0062 | live Next crawl4ai E2E | `CRAWL_PROVIDER=crawl4ai` + `QSTASH_DEV_PORT=8082` → recrawl → chat | **PASS** | 2026-08-31 | indexed 2/2; chat grounded; note: avoid QStash Dev vs agents on same :8080 |
+| VAL-0063 | verify-deep + commit-ready | lint/test/build + pytest + implementation-verifier | **PASS WITH WARNINGS** | 2026-08-31 | STATE hash drift fixed this commit; Coolify still operator |
 
 `eval_gate_status`: **WAIVED for firewall** — GATE-0002 Human-Action (Bot Protection + AI Bots Deny) confirmed by user 2026-08-30; full production eval still optional.
 
