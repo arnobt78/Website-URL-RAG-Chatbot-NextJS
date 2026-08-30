@@ -7,7 +7,7 @@
 | Name           | Website URL RAG Chatbot                                                                                                                                        |
 | Description    | Next.js 16 RAG chatbot: Firecrawl whole-site crawl (Upstash Workflow) or Jina single-page fallback, Upstash Vector RAG, multi-provider LLM stream, Redis history, localStorage multi-chat sidebar |
 | Current Status | **GATE-0013 + GATE-0002 RESOLVED** — Sentry tunnel + Langfuse; Vercel firewall/env set |
-| Git baseline   | pending commit (parent `9075d59` / `origin/main`) |
+| Git baseline   | `94abb75` / `origin/main` |
 
 ---
 

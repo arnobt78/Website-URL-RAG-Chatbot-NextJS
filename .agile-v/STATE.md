@@ -6,7 +6,7 @@
 | Phase / Stage | REQ-0013 / GATE-0013 + GATE-0002 **closed** at commit-ready |
 | Gate | GATE-0013 RESOLVED; GATE-0012 RESOLVED; GATE-0002 RESOLVED |
 | Status | Sentry tunnel + Langfuse shipped; Vercel firewall + prod env confirmed by human |
-| Git HEAD (reconciled) | pending this commit (parent `9075d59`) |
+| Git HEAD (reconciled) | `94abb75` (parent `9075d59`) |
 | Last updated | 2026-08-30T22:10:00Z |
 | Agent | Cursor |
 
